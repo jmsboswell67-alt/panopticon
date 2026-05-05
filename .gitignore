@@ -1,0 +1,117 @@
+# =============================================================================
+# Panopticon .gitignore
+#
+# CRITICAL: This file is the privacy gate for a public repository.
+# The repo contains the *schema* of personal context, never *filled-in answers*.
+# If you fork this and start using it, your real data must NEVER end up here.
+#
+# Conventions:
+#   - schema/*.schema.json     -> the empty JSON shape (committed)
+#   - personal/                -> your filled-in answers (gitignored, local only)
+#   - journal/ contents        -> gitignored except README.md
+#   - *.local.json / *.personal.json  -> always gitignored
+# =============================================================================
+
+
+# --- Personal data (DO NOT COMMIT) -------------------------------------------
+personal/
+**/context.json
+**/context.local.json
+**/*.personal.json
+**/*.personal.md
+*.local.json
+
+# Journal: README.md is committed, everything else is private until the user
+# explicitly decides to publish entries.
+journal/*
+!journal/README.md
+
+
+# --- Secrets -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+android/key.properties
+
+
+# --- Local databases / dumps -------------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal
+exports/
+dumps/
+
+
+# --- Flutter / Dart ----------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+.fvm/
+android/.flutter-plugins
+android/.flutter-plugins-dependencies
+
+
+# --- Native Android / Gradle -------------------------------------------------
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+android/.cxx/
+android/app/release/
+android/app/debug/
+*.apk
+*.aab
+
+
+# --- Python (desktop-collector) ----------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+dist/
+*.egg
+
+
+# --- IDE / Editor ------------------------------------------------------------
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+.cursor/
+.aider*
+
+
+# --- OS ----------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+
+# --- Logs / temp -------------------------------------------------------------
+*.log
+logs/
+tmp/
+.tmp/
