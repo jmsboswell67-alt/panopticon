@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/jmsboswell67-alt/panopticon/schema/events.schema.json",
+  "title": "Panopticon Event",
+  "description": "The canonical shape of a single event in the Panopticon event log. Every collector — Android Accessibility, NotificationListener, UsageStats, desktop, manual, health — emits events conforming to this schema. Stored in the local SQLite `events` table.",
+  "type": "object",
+  "required": ["timestamp_utc", "timezone_offset", "source", "event_type", "schema_version"],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "Local autoincrement primary key. Assigned by SQLite; not present in events emitted by collectors before insert."
+    },
+    "timestamp_utc": {
+      "type": "integer",
+      "description": "Epoch milliseconds, UTC. Always UTC — store local-time interpretation via timezone_offset.",
+      "minimum": 0
+    },
+    "timezone_offset": {
+      "type": "integer",
+      "description": "Minutes offset from UTC at the moment the event was captured. e.g. -480 for PST. Stored alongside the timestamp because the user may travel and a single 'local time' field would lose information.",
+      "minimum": -1440,
+      "maximum": 1440
+    },
+    "source": {
+      "type": "string",
+      "description": "The collector that produced this event.",
+      "enum": ["accessibility", "notification", "usagestats", "desktop", "manual", "health"]
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Event subtype, scoped per source. See ARCHITECTURE.md for the canonical list of (source, event_type) pairs."
+    },
+    "package_name": {
+      "type": ["string", "null"],
+      "description": "Android package name for app-related events (e.g. 'com.instagram.android'). Null for events without an associated app."
+    },
+    "payload_json": {
+      "type": "object",
+      "description": "Structured event-specific data. Shape depends on (source, event_type). Stored as a JSON string in SQLite; modeled as an object here.",
+      "additionalProperties": true
+    },
+    "schema_version": {
+      "type": "integer",
+      "description": "Schema version of this event payload. Incremented when the shape of payload_json for any (source, event_type) changes in a non-backwards-compatible way.",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false,
+
+  "$defs": {
+    "_event_type_enums": {
+      "description": "Reference: valid event_type values per source. Not enforced at the schema level (since payload shapes vary), but documented here for collectors and forkers.",
+      "accessibility": ["window_state_changed", "app_focus_changed", "screen_on", "screen_off"],
+      "notification": ["notification_posted", "notification_removed"],
+      "usagestats": ["daily_summary"],
+      "desktop": ["active_window_changed", "browser_history_imported"],
+      "health": ["heart_rate_sample", "sleep_session", "step_count"],
+      "manual": ["user_note", "context_update"]
+    }
+  }
+}

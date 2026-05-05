@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/jmsboswell67-alt/panopticon/schema/context.schema.json",
+  "title": "Panopticon User Context",
+  "description": "The shape of the user-provided context document. Stored as a single versioned JSON document, NOT normalized into rows — this lets the user edit holistically and keeps semantics together. Phase 2 populates this via the intake flow; Phase 1 just defines the schema and provides a placeholder UI.\n\nIMPORTANT: This schema is committed to the public repository. The FILLED-IN version of this document is gitignored under `personal/` and lives only on the user's device. Never commit a populated context document.",
+  "type": "object",
+  "required": ["schema_version", "last_updated_utc"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema version of this context document. Bumped on breaking shape changes."
+    },
+    "last_updated_utc": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Epoch milliseconds of the most recent edit."
+    },
+    "demographics": {
+      "type": "object",
+      "description": "Optional demographic data. Used as context for framing, NEVER as a predictor or scoring input. See ETHICS.md hard rail #1.",
+      "properties": {
+        "age": { "type": ["integer", "null"], "minimum": 0, "maximum": 150 },
+        "location": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "background": {
+      "type": "object",
+      "description": "Background and life history. The coaching layer uses this to *frame* current behavior (be gentler when context warrants), never to predict outcomes.",
+      "properties": {
+        "childhood_stability": {
+          "type": ["string", "null"],
+          "description": "Free-text or enum description of childhood stability. Optional."
+        },
+        "significant_events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "approximate_year": { "type": ["integer", "null"] },
+              "notes": { "type": ["string", "null"] }
+            },
+            "required": ["label"]
+          }
+        },
+        "military_service": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "diagnoses": {
+      "type": "array",
+      "description": "Diagnoses the user has and chooses to share with the coaching layer. Trigger trauma-informed framing.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "diagnosed_year": { "type": ["integer", "null"] },
+          "currently_active": { "type": ["boolean", "null"] },
+          "notes": { "type": ["string", "null"] }
+        },
+        "required": ["label"]
+      }
+    },
+    "current_circumstances": {
+      "type": "object",
+      "properties": {
+        "relationship_status": { "type": ["string", "null"] },
+        "parenting": { "type": ["string", "null"] },
+        "financial_stress_level": {
+          "type": ["string", "null"],
+          "enum": [null, "low", "moderate", "high", "acute"]
+        },
+        "caregiving_responsibilities": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "values_and_goals": {
+      "type": "object",
+      "properties": {
+        "stated_values": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "What the user says they value. The coaching layer surfaces gaps between stated values and observed behavior."
+        },
+        "current_goals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "horizon": { "type": ["string", "null"] },
+              "notes": { "type": ["string", "null"] }
+            },
+            "required": ["label"]
+          }
+        },
+        "what_a_good_life_means": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "known_patterns": {
+      "type": "array",
+      "description": "Patterns the user has already self-identified. The system may confirm, refine, or contradict these as data accumulates.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "user_belief": { "type": ["string", "null"] }
+        },
+        "required": ["label"]
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "preferred_coach_persona": {
+          "type": ["string", "null"],
+          "description": "Selected persona for the coaching layer. See prompts/personas/.",
+          "enum": [null, "gudea", "sam", "reyes", "wade", "nori", "maximus", "rex", "jed"]
+        },
+        "coaching_directness_level": {
+          "type": ["string", "null"],
+          "enum": [null, "gentle", "balanced", "direct", "blunt"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

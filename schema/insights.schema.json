@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/jmsboswell67-alt/panopticon/schema/insights.schema.json",
+  "title": "Panopticon Insight",
+  "description": "An insight produced by the AI coaching layer. Phase 5 deliverable — schema is intentionally minimal in Phase 1 and will expand. Stored in the local SQLite `insights` table.",
+  "type": "object",
+  "required": ["schema_version", "generated_utc", "kind", "body"],
+  "properties": {
+    "id": {
+      "type": "integer",
+      "description": "Local autoincrement PK."
+    },
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "generated_utc": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Epoch ms when the LLM call completed."
+    },
+    "kind": {
+      "type": "string",
+      "description": "What kind of insight this is.",
+      "enum": ["weekly_review", "trajectory_analysis", "values_audit", "anomaly_flag", "pattern_observation"]
+    },
+    "persona": {
+      "type": ["string", "null"],
+      "description": "Which persona produced the insight. Null for non-persona system outputs (e.g. anomaly_flag).",
+      "enum": [null, "gudea", "sam", "reyes", "wade", "nori", "maximus", "rex", "jed"]
+    },
+    "covers_period": {
+      "type": ["object", "null"],
+      "description": "Time range this insight covers, if applicable.",
+      "properties": {
+        "start_utc": { "type": "integer", "minimum": 0 },
+        "end_utc": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["start_utc", "end_utc"]
+    },
+    "body": {
+      "type": "string",
+      "description": "The insight text, as rendered for the user."
+    },
+    "supporting_metrics_json": {
+      "type": ["object", "null"],
+      "description": "Structured metrics the insight is grounded in (e.g. focus minutes, notification counts). Used for the 'show your work' UI affordance.",
+      "additionalProperties": true
+    },
+    "user_reaction": {
+      "type": ["string", "null"],
+      "description": "User's response to the insight, if they recorded one. Feeds future tuning of persona selection and prompt assembly.",
+      "enum": [null, "useful", "not_useful", "uncomfortable_but_true", "wrong", "unclear"]
+    }
+  },
+  "additionalProperties": false
+}
