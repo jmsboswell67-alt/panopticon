@@ -1,0 +1,81 @@
+# Build APK on push.
+#
+# Phase 1 stub — this workflow is non-functional until the Flutter project is
+# scaffolded under `android/`. It's defined now so that the moment scaffolding
+# lands, CI is wired up.
+#
+# Activating: once `android/pubspec.yaml` exists, the `if` guards below can be
+# removed. Until then, the job exits early with a clear message rather than
+# failing CI.
+
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check-scaffolding:
+    name: Check Flutter scaffolding
+    runs-on: ubuntu-latest
+    outputs:
+      flutter_ready: ${{ steps.check.outputs.flutter_ready }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        run: |
+          if [ -f "android/pubspec.yaml" ]; then
+            echo "flutter_ready=true" >> "$GITHUB_OUTPUT"
+            echo "Flutter project detected."
+          else
+            echo "flutter_ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Flutter project not scaffolded yet. Skipping APK build. This is expected during Phase 1 setup."
+          fi
+
+  build:
+    name: Build debug APK
+    needs: check-scaffolding
+    if: needs.check-scaffolding.outputs.flutter_ready == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: android
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: android
+        run: flutter analyze
+
+      - name: Run tests
+        working-directory: android
+        run: flutter test
+
+      - name: Build debug APK
+        working-directory: android
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: panopticon-debug-apk
+          path: android/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
