@@ -1,0 +1,99 @@
+{
+  "$schema": "../schema/instrument.schema.json",
+  "instrument_id": "mfq30",
+  "instrument_version": "MFQ30-2008",
+  "name": "Moral Foundations Questionnaire (30-item)",
+  "purpose": "Measures the relative weight a person places on five moral foundations: Care/Harm, Fairness/Cheating, Loyalty/Betrayal, Authority/Subversion, Sanctity/Degradation. Useful for political/values mapping and for cross-checking self-reported values against behavioral data.",
+  "citation": "Graham, J., Haidt, J., & Nosek, B. A. (2009). Liberals and conservatives rely on different sets of moral foundations. Journal of Personality and Social Psychology, 96(5), 1029-1046. Instrument: Graham, J., Haidt, J., et al. (2011). Mapping the moral domain. Journal of Personality and Social Psychology, 101(2), 366-385.",
+  "license": "Released for free use by the authors at https://moralfoundations.org/. Per their site, the MFQ may be freely used for academic and personal use; commercial use requires permission.",
+  "administration": {
+    "default_frequency": "monthly",
+    "minimum_interval_days": 28,
+    "estimated_minutes": 8,
+    "recall_window_days": null
+  },
+  "parts": [
+    {
+      "part_id": "relevance",
+      "stem": "When you decide whether something is right or wrong, to what extent are the following considerations relevant to your thinking? Please rate each statement using this scale.",
+      "response_format": {
+        "type": "likert",
+        "options": [
+          {"value": 0, "label": "Not at all relevant"},
+          {"value": 1, "label": "Not very relevant"},
+          {"value": 2, "label": "Slightly relevant"},
+          {"value": 3, "label": "Somewhat relevant"},
+          {"value": 4, "label": "Very relevant"},
+          {"value": 5, "label": "Extremely relevant"}
+        ]
+      },
+      "items": [
+        {"item_id": "mfq_r1", "prompt": "Whether or not someone suffered emotionally", "subscale": "care"},
+        {"item_id": "mfq_r2", "prompt": "Whether or not some people were treated differently than others", "subscale": "fairness"},
+        {"item_id": "mfq_r3", "prompt": "Whether or not someone's action showed love for his or her country", "subscale": "loyalty"},
+        {"item_id": "mfq_r4", "prompt": "Whether or not someone showed a lack of respect for authority", "subscale": "authority"},
+        {"item_id": "mfq_r5", "prompt": "Whether or not someone violated standards of purity and decency", "subscale": "sanctity"},
+        {"item_id": "mfq_r6", "prompt": "Whether or not someone was good at math", "subscale": "catch", "notes": "Catch item — not scored. Used to detect careless responding."},
+        {"item_id": "mfq_r7", "prompt": "Whether or not someone cared for someone weak or vulnerable", "subscale": "care"},
+        {"item_id": "mfq_r8", "prompt": "Whether or not someone acted unfairly", "subscale": "fairness"},
+        {"item_id": "mfq_r9", "prompt": "Whether or not someone did something to betray his or her group", "subscale": "loyalty"},
+        {"item_id": "mfq_r10", "prompt": "Whether or not someone conformed to the traditions of society", "subscale": "authority"},
+        {"item_id": "mfq_r11", "prompt": "Whether or not someone did something disgusting", "subscale": "sanctity"},
+        {"item_id": "mfq_r12", "prompt": "Whether or not someone was cruel", "subscale": "care"},
+        {"item_id": "mfq_r13", "prompt": "Whether or not someone was denied his or her rights", "subscale": "fairness"},
+        {"item_id": "mfq_r14", "prompt": "Whether or not someone showed a lack of loyalty", "subscale": "loyalty"},
+        {"item_id": "mfq_r15", "prompt": "Whether or not an action caused chaos or disorder", "subscale": "authority"},
+        {"item_id": "mfq_r16", "prompt": "Whether or not someone acted in a way that God would approve of", "subscale": "sanctity"}
+      ]
+    },
+    {
+      "part_id": "agreement",
+      "stem": "Please read the following sentences and indicate your agreement or disagreement.",
+      "response_format": {
+        "type": "likert",
+        "options": [
+          {"value": 0, "label": "Strongly disagree"},
+          {"value": 1, "label": "Moderately disagree"},
+          {"value": 2, "label": "Slightly disagree"},
+          {"value": 3, "label": "Slightly agree"},
+          {"value": 4, "label": "Moderately agree"},
+          {"value": 5, "label": "Strongly agree"}
+        ]
+      },
+      "items": [
+        {"item_id": "mfq_a1", "prompt": "Compassion for those who are suffering is the most crucial virtue.", "subscale": "care"},
+        {"item_id": "mfq_a2", "prompt": "When the government makes laws, the number one principle should be ensuring that everyone is treated fairly.", "subscale": "fairness"},
+        {"item_id": "mfq_a3", "prompt": "I am proud of my country's history.", "subscale": "loyalty"},
+        {"item_id": "mfq_a4", "prompt": "Respect for authority is something all children need to learn.", "subscale": "authority"},
+        {"item_id": "mfq_a5", "prompt": "People should not do things that are disgusting, even if no one is harmed.", "subscale": "sanctity"},
+        {"item_id": "mfq_a6", "prompt": "It is better to do good than to do bad.", "subscale": "catch", "notes": "Catch item — not scored."},
+        {"item_id": "mfq_a7", "prompt": "One of the worst things a person could do is hurt a defenseless animal.", "subscale": "care"},
+        {"item_id": "mfq_a8", "prompt": "Justice is the most important requirement for a society.", "subscale": "fairness"},
+        {"item_id": "mfq_a9", "prompt": "People should be loyal to their family members, even when they have done something wrong.", "subscale": "loyalty"},
+        {"item_id": "mfq_a10", "prompt": "Men and women each have different roles to play in society.", "subscale": "authority"},
+        {"item_id": "mfq_a11", "prompt": "I would call some acts wrong on the grounds that they are unnatural.", "subscale": "sanctity"},
+        {"item_id": "mfq_a12", "prompt": "It can never be right to kill a human being.", "subscale": "care"},
+        {"item_id": "mfq_a13", "prompt": "I think it's morally wrong that rich children inherit a lot of money while poor children inherit nothing.", "subscale": "fairness"},
+        {"item_id": "mfq_a14", "prompt": "It is more important to be a team player than to express oneself.", "subscale": "loyalty"},
+        {"item_id": "mfq_a15", "prompt": "If I were a soldier and disagreed with my commanding officer's orders, I would obey anyway because that is my duty.", "subscale": "authority"},
+        {"item_id": "mfq_a16", "prompt": "Chastity is an important and valuable virtue.", "subscale": "sanctity"}
+      ]
+    }
+  ],
+  "scoring": {
+    "subscales": [
+      {"subscale_id": "care", "name": "Care/Harm", "items": ["mfq_r1", "mfq_r7", "mfq_r12", "mfq_a1", "mfq_a7", "mfq_a12"], "method": "mean", "max_score": 5},
+      {"subscale_id": "fairness", "name": "Fairness/Cheating", "items": ["mfq_r2", "mfq_r8", "mfq_r13", "mfq_a2", "mfq_a8", "mfq_a13"], "method": "mean", "max_score": 5},
+      {"subscale_id": "loyalty", "name": "Loyalty/Betrayal", "items": ["mfq_r3", "mfq_r9", "mfq_r14", "mfq_a3", "mfq_a9", "mfq_a14"], "method": "mean", "max_score": 5},
+      {"subscale_id": "authority", "name": "Authority/Subversion", "items": ["mfq_r4", "mfq_r10", "mfq_r15", "mfq_a4", "mfq_a10", "mfq_a15"], "method": "mean", "max_score": 5},
+      {"subscale_id": "sanctity", "name": "Sanctity/Degradation", "items": ["mfq_r5", "mfq_r11", "mfq_r16", "mfq_a5", "mfq_a11", "mfq_a16"], "method": "mean", "max_score": 5},
+      {"subscale_id": "individualizing", "name": "Individualizing foundations (Care + Fairness)", "items": [], "method": "mean_of_subscales", "subscale_inputs": ["care", "fairness"]},
+      {"subscale_id": "binding", "name": "Binding foundations (Loyalty + Authority + Sanctity)", "items": [], "method": "mean_of_subscales", "subscale_inputs": ["loyalty", "authority", "sanctity"]},
+      {"subscale_id": "progressivism_score", "name": "Progressivism score", "description": "Higher = more progressive moral profile (individualizing weighted higher than binding). Computed as (individualizing - binding).", "items": [], "method": "individualizing_minus_binding"}
+    ],
+    "validity_checks": [
+      {"check_id": "catch_items", "description": "If catch items mfq_r6 or mfq_a6 are answered with extreme/inattentive values, flag the administration as low-validity.", "items": ["mfq_r6", "mfq_a6"]}
+    ],
+    "flag_rules": []
+  }
+}

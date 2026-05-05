@@ -1,0 +1,136 @@
+{
+  "$schema": "../schema/instrument.schema.json",
+  "instrument_id": "daily_scales",
+  "instrument_version": "1.0",
+  "name": "Panopticon Daily Sliding Scales",
+  "purpose": "Lightweight daily self-report covering affective and physical state. Designed for 30-60 second completion. Not a validated instrument — a deliberately custom set chosen to anchor daily journal prose with quantitative dimensions and to surface day-over-day trends.",
+  "citation": "Panopticon-internal. Not externally validated.",
+  "license": "MIT (this project).",
+  "administration": {
+    "default_frequency": "daily",
+    "minimum_interval_hours": 18,
+    "estimated_seconds": 45,
+    "recall_window_hours": 24
+  },
+  "stem": "How was today, on each of these dimensions?",
+  "scales": [
+    {
+      "scale_id": "mood",
+      "prompt": "Mood",
+      "type": "likert_1_10",
+      "anchor_low": "Worst it gets",
+      "anchor_high": "Best it gets"
+    },
+    {
+      "scale_id": "energy",
+      "prompt": "Energy",
+      "type": "likert_1_10",
+      "anchor_low": "Empty",
+      "anchor_high": "Full tank"
+    },
+    {
+      "scale_id": "focus",
+      "prompt": "Focus / mental clarity",
+      "type": "likert_1_10",
+      "anchor_low": "Foggy",
+      "anchor_high": "Sharp"
+    },
+    {
+      "scale_id": "anxiety",
+      "prompt": "Anxiety",
+      "type": "likert_1_10",
+      "anchor_low": "None",
+      "anchor_high": "Overwhelming"
+    },
+    {
+      "scale_id": "libido",
+      "prompt": "Libido",
+      "type": "likert_1_10",
+      "anchor_low": "Absent",
+      "anchor_high": "Strong"
+    },
+    {
+      "scale_id": "sleep_quality",
+      "prompt": "Sleep quality (last night)",
+      "type": "likert_1_10",
+      "anchor_low": "Awful",
+      "anchor_high": "Restorative"
+    },
+    {
+      "scale_id": "loneliness",
+      "prompt": "Loneliness",
+      "type": "likert_1_10",
+      "anchor_low": "Connected",
+      "anchor_high": "Isolated"
+    },
+    {
+      "scale_id": "physical_pain",
+      "prompt": "Physical pain",
+      "type": "likert_1_10",
+      "anchor_low": "None",
+      "anchor_high": "Severe",
+      "secondary_field": {"field_id": "pain_location", "prompt": "Where?", "type": "text", "optional": true}
+    },
+    {
+      "scale_id": "self_compassion",
+      "prompt": "Self-compassion (how you talked to yourself)",
+      "type": "likert_1_10",
+      "anchor_low": "Cruel",
+      "anchor_high": "Kind"
+    },
+    {
+      "scale_id": "alcohol_servings",
+      "prompt": "Alcohol servings (today)",
+      "type": "integer",
+      "min": 0,
+      "max": 30
+    },
+    {
+      "scale_id": "cannabis_use",
+      "prompt": "Cannabis use (today)",
+      "type": "enum",
+      "options": ["none", "small", "moderate", "heavy"]
+    },
+    {
+      "scale_id": "suicidal_ideation",
+      "prompt": "Thoughts of suicide or self-harm today",
+      "type": "enum",
+      "options": [
+        {"value": "none", "label": "None"},
+        {"value": "passive", "label": "Passive (e.g. 'wouldn't mind not waking up')"},
+        {"value": "active_no_plan", "label": "Active, no plan"},
+        {"value": "active_with_plan", "label": "Active, with plan or means"}
+      ],
+      "safety_critical": true
+    }
+  ],
+  "scoring": {
+    "subscales": [],
+    "flag_rules": [
+      {
+        "rule_id": "suicidal_ideation_active",
+        "condition": "suicidal_ideation in ['active_no_plan', 'active_with_plan']",
+        "flag_category": "suicidality",
+        "flag_severity_map": {"active_no_plan": "concern", "active_with_plan": "urgent"}
+      },
+      {
+        "rule_id": "suicidal_ideation_passive_persistent",
+        "description": "Passive suicidal ideation logged on 5+ of the last 7 days",
+        "flag_category": "suicidality",
+        "flag_severity": "concern"
+      },
+      {
+        "rule_id": "mood_crash",
+        "description": "Mood drops 4+ points from 14-day rolling average",
+        "flag_category": "scale_crash",
+        "flag_severity": "concern"
+      },
+      {
+        "rule_id": "alcohol_heavy_persistent",
+        "description": "5+ alcohol servings on 4+ of the last 7 days",
+        "flag_category": "substance_use",
+        "flag_severity": "watch"
+      }
+    ]
+  }
+}

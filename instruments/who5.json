@@ -1,0 +1,64 @@
+{
+  "$schema": "../schema/instrument.schema.json",
+  "instrument_id": "who5",
+  "instrument_version": "1998",
+  "name": "WHO-5 Well-Being Index",
+  "purpose": "Subjective well-being over the past 2 weeks. Short, sensitive to change, validated in many languages.",
+  "citation": "Topp, C. W., Østergaard, S. D., Søndergaard, S., & Bech, P. (2015). The WHO-5 Well-Being Index: a systematic review of the literature. Psychotherapy and Psychosomatics, 84(3), 167-176.",
+  "license": "Free to use, copy, translate, distribute. Originally released by the WHO Regional Office for Europe (1998).",
+  "administration": {
+    "default_frequency": "weekly",
+    "minimum_interval_days": 7,
+    "estimated_minutes": 1,
+    "recall_window_days": 14
+  },
+  "response_format": {
+    "type": "likert",
+    "options": [
+      {"value": 5, "label": "All of the time"},
+      {"value": 4, "label": "Most of the time"},
+      {"value": 3, "label": "More than half of the time"},
+      {"value": 2, "label": "Less than half of the time"},
+      {"value": 1, "label": "Some of the time"},
+      {"value": 0, "label": "At no time"}
+    ]
+  },
+  "stem": "Please indicate for each of the five statements which is closest to how you have been feeling over the last two weeks. Notice that higher numbers mean better well-being.",
+  "items": [
+    {"item_id": "who5_1", "prompt": "I have felt cheerful and in good spirits"},
+    {"item_id": "who5_2", "prompt": "I have felt calm and relaxed"},
+    {"item_id": "who5_3", "prompt": "I have felt active and vigorous"},
+    {"item_id": "who5_4", "prompt": "I woke up feeling fresh and rested"},
+    {"item_id": "who5_5", "prompt": "My daily life has been filled with things that interest me"}
+  ],
+  "scoring": {
+    "subscales": [
+      {
+        "subscale_id": "raw",
+        "name": "WHO-5 Raw Score",
+        "items": ["who5_1", "who5_2", "who5_3", "who5_4", "who5_5"],
+        "method": "sum"
+      },
+      {
+        "subscale_id": "percentage",
+        "name": "WHO-5 Percentage Score (0-100)",
+        "items": ["who5_1", "who5_2", "who5_3", "who5_4", "who5_5"],
+        "method": "sum_times_4",
+        "interpretation": [
+          {"range": [0, 28], "label": "Poor well-being; consider depression screen", "severity": "concern"},
+          {"range": [29, 50], "label": "Reduced well-being", "severity": "watch"},
+          {"range": [51, 100], "label": "Adequate well-being", "severity": "info"}
+        ]
+      }
+    ],
+    "flag_rules": [
+      {
+        "rule_id": "who5_low",
+        "condition": "percentage <= 28",
+        "flag_category": "depression_severity",
+        "flag_severity": "concern",
+        "notes": "Score ≤28 is the validated threshold for further depression screening per the WHO-5 manual."
+      }
+    ]
+  }
+}

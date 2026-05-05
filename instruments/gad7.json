@@ -1,0 +1,58 @@
+{
+  "$schema": "../schema/instrument.schema.json",
+  "instrument_id": "gad7",
+  "instrument_version": "1.0",
+  "name": "Generalized Anxiety Disorder-7",
+  "purpose": "Anxiety severity screening. Companion to PHQ-9.",
+  "citation": "Spitzer, R. L., Kroenke, K., Williams, J. B. W., & Löwe, B. (2006). A brief measure for assessing generalized anxiety disorder: the GAD-7. Archives of Internal Medicine, 166(10), 1092-1097.",
+  "license": "Public domain. Released by Pfizer; free to reproduce, translate, display, distribute.",
+  "administration": {
+    "default_frequency": "weekly",
+    "minimum_interval_days": 7,
+    "estimated_minutes": 2,
+    "recall_window_days": 14
+  },
+  "response_format": {
+    "type": "likert",
+    "options": [
+      {"value": 0, "label": "Not at all"},
+      {"value": 1, "label": "Several days"},
+      {"value": 2, "label": "More than half the days"},
+      {"value": 3, "label": "Nearly every day"}
+    ]
+  },
+  "stem": "Over the last 2 weeks, how often have you been bothered by the following problems?",
+  "items": [
+    {"item_id": "gad7_1", "prompt": "Feeling nervous, anxious, or on edge"},
+    {"item_id": "gad7_2", "prompt": "Not being able to stop or control worrying"},
+    {"item_id": "gad7_3", "prompt": "Worrying too much about different things"},
+    {"item_id": "gad7_4", "prompt": "Trouble relaxing"},
+    {"item_id": "gad7_5", "prompt": "Being so restless that it is hard to sit still"},
+    {"item_id": "gad7_6", "prompt": "Becoming easily annoyed or irritable"},
+    {"item_id": "gad7_7", "prompt": "Feeling afraid as if something awful might happen"}
+  ],
+  "scoring": {
+    "subscales": [
+      {
+        "subscale_id": "total",
+        "name": "GAD-7 Total Score",
+        "items": ["gad7_1", "gad7_2", "gad7_3", "gad7_4", "gad7_5", "gad7_6", "gad7_7"],
+        "method": "sum",
+        "interpretation": [
+          {"range": [0, 4], "label": "Minimal anxiety", "severity": "info"},
+          {"range": [5, 9], "label": "Mild anxiety", "severity": "watch"},
+          {"range": [10, 14], "label": "Moderate anxiety", "severity": "concern"},
+          {"range": [15, 21], "label": "Severe anxiety", "severity": "urgent"}
+        ]
+      }
+    ],
+    "flag_rules": [
+      {
+        "rule_id": "gad7_total_severe",
+        "condition": "total >= 15",
+        "flag_category": "anxiety_severity",
+        "flag_severity": "urgent"
+      }
+    ]
+  }
+}

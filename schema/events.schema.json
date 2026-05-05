@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/jmsboswell67-alt/panopticon/schema/events.schema.json",
   "title": "Panopticon Event",
-  "description": "The canonical shape of a single event in the Panopticon event log. Every collector — Android Accessibility, NotificationListener, UsageStats, desktop, manual, health — emits events conforming to this schema. Stored in the local SQLite `events` table.",
+  "description": "The canonical shape of a single event in the Panopticon event log. Every collector — Android Accessibility, NotificationListener, UsageStats, desktop, manual journal/checkin, instrument response, cognitive test, purchase, browse, health, and coach briefing — emits events conforming to this schema. Stored in the local SQLite `events` table. The payload_json shape varies by (source, event_type); canonical shapes are documented in $defs and in docs/data-sources.md, docs/journal-pipeline.md, and docs/daily-briefing.md.",
   "type": "object",
   "required": ["timestamp_utc", "timezone_offset", "source", "event_type", "schema_version"],
   "properties": {
@@ -23,12 +23,24 @@
     },
     "source": {
       "type": "string",
-      "description": "The collector that produced this event.",
-      "enum": ["accessibility", "notification", "usagestats", "desktop", "manual", "health"]
+      "description": "The collector or subsystem that produced this event.",
+      "enum": [
+        "accessibility",
+        "notification",
+        "usagestats",
+        "desktop",
+        "manual",
+        "instrument",
+        "cognitive_test",
+        "purchase",
+        "browse",
+        "health",
+        "coach"
+      ]
     },
     "event_type": {
       "type": "string",
-      "description": "Event subtype, scoped per source. See ARCHITECTURE.md for the canonical list of (source, event_type) pairs."
+      "description": "Event subtype, scoped per source. See $defs._event_type_enums and the docs/ folder for the canonical list of (source, event_type) pairs and their payload shapes."
     },
     "package_name": {
       "type": ["string", "null"],
@@ -36,7 +48,7 @@
     },
     "payload_json": {
       "type": "object",
-      "description": "Structured event-specific data. Shape depends on (source, event_type). Stored as a JSON string in SQLite; modeled as an object here.",
+      "description": "Structured event-specific data. Shape depends on (source, event_type). Stored as a JSON string in SQLite; modeled as an object here. See $defs for canonical payload shapes per event type.",
       "additionalProperties": true
     },
     "schema_version": {
@@ -53,9 +65,267 @@
       "accessibility": ["window_state_changed", "app_focus_changed", "screen_on", "screen_off"],
       "notification": ["notification_posted", "notification_removed"],
       "usagestats": ["daily_summary"],
-      "desktop": ["active_window_changed", "browser_history_imported"],
-      "health": ["heart_rate_sample", "sleep_session", "step_count"],
-      "manual": ["user_note", "context_update"]
+      "desktop": ["active_window_changed", "browser_history_imported", "keystroke_rollup"],
+      "manual": ["journal_entry", "daily_checkin", "observed_interaction", "user_note", "context_update"],
+      "instrument": ["response"],
+      "cognitive_test": ["result"],
+      "purchase": ["transaction"],
+      "browse": ["search_query", "page_visit"],
+      "health": ["heart_rate_sample", "hrv_sample", "rhr_sample", "sleep_session", "sleep_stage", "step_count", "spo2_sample", "skin_temp_sample"],
+      "coach": ["briefing", "flag", "hypothesis_test"]
+    },
+
+    "manual_journal_entry_payload": {
+      "description": "Free-form prose journal for a given day, optionally segmented by section after pipeline processing. The pipeline extracts entities, events, sentiment, and self-hypotheses from the raw text and writes those into sections[] and self_hypotheses[]. The original prose is preserved verbatim in `text`.",
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {"type": "string", "description": "The full original prose as the user wrote it. Never modified after capture."},
+        "input_method": {"type": "string", "enum": ["typed", "voice", "mixed"]},
+        "completion_seconds": {"type": "integer", "description": "Wall-clock time spent composing, if measurable."},
+        "sections": {
+          "type": "array",
+          "description": "Pipeline-extracted segmentation of the prose. Each section tags a slice of text with a category for later querying ('show me all my food sections from the last 90 days').",
+          "items": {
+            "type": "object",
+            "required": ["section_type", "text_span"],
+            "properties": {
+              "section_type": {
+                "type": "string",
+                "enum": ["narrative", "food", "sleep", "social", "work", "exercise", "media", "spending", "animal_interaction", "self_hypothesis", "concern", "win", "media_consumed", "cognitive_engagement", "intimacy", "substance_use", "other"]
+              },
+              "text_span": {"type": "object", "properties": {"start": {"type": "integer"}, "end": {"type": "integer"}}},
+              "extracted_entities": {"type": "object", "additionalProperties": true},
+              "extracted_events": {"type": "array", "items": {"type": "object", "additionalProperties": true}},
+              "sentiment": {"type": "object", "properties": {"valence": {"type": "number"}, "arousal": {"type": "number"}}}
+            }
+          }
+        },
+        "self_hypotheses": {
+          "type": "array",
+          "description": "First-class testable claims the user made about themselves in the prose. The coach pipeline tests each against the event log and writes test results into coach.hypothesis_test events.",
+          "items": {
+            "type": "object",
+            "required": ["claim"],
+            "properties": {
+              "claim": {"type": "string", "description": "Verbatim or near-verbatim quote of the self-statement."},
+              "scope_window": {"type": "string", "description": "Time window the claim implicitly covers, e.g. 'always', 'this week', 'since starting X'."},
+              "test_status": {"type": "string", "enum": ["untested", "supported", "refuted", "partial", "untestable"]},
+              "supporting_evidence_query": {"type": "string", "description": "The data query that would test this claim (e.g. event-log filter)."}
+            }
+          }
+        },
+        "scales_snapshot": {
+          "type": "object",
+          "description": "Optional embedded daily_checkin scales captured alongside the journal entry, for convenience when the user fills both at once. Equivalent to a separate manual.daily_checkin event."
+        }
+      }
+    },
+
+    "manual_daily_checkin_payload": {
+      "description": "Lightweight sliding-scale self-report. Designed to be filled in 30-60 seconds. Each scale_id is defined in instruments/daily_scales.json.",
+      "type": "object",
+      "required": ["scales"],
+      "properties": {
+        "scales": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["scale_id", "value"],
+            "properties": {
+              "scale_id": {"type": "string", "description": "e.g. 'mood', 'energy', 'libido', 'suicidal_ideation'"},
+              "value": {"type": ["number", "string"]},
+              "scale_min": {"type": "number"},
+              "scale_max": {"type": "number"},
+              "skipped": {"type": "boolean", "description": "If the user explicitly skipped this scale today; the skip itself is a signal."}
+            }
+          }
+        }
+      }
+    },
+
+    "manual_observed_interaction_payload": {
+      "description": "A discrete self-observed interaction the user wants to log explicitly (e.g. 'snapped at dog', 'helped a stranger with directions'). Distinct from the journal because it gets timestamped at the moment, not retrospectively at end-of-day.",
+      "type": "object",
+      "required": ["category", "valence"],
+      "properties": {
+        "category": {"type": "string", "enum": ["animal", "family", "friend", "partner", "stranger", "colleague", "child", "self", "other"]},
+        "valence": {"type": "string", "enum": ["positive", "neutral", "negative", "mixed"]},
+        "intensity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "parties": {"type": "array", "items": {"type": "string"}, "description": "Free-form labels; the user defines what 'mom' or 'Cooper' resolves to."},
+        "notes": {"type": "string"}
+      }
+    },
+
+    "instrument_response_payload": {
+      "description": "A complete administration of a validated instrument (PHQ-9, GAD-7, IRI, MFQ, etc.). Item-level responses are stored, NOT just totals — re-scoring with a different algorithm later is then possible without re-administering.",
+      "type": "object",
+      "required": ["instrument_id", "instrument_version", "item_responses"],
+      "properties": {
+        "instrument_id": {"type": "string", "description": "Matches a file in instruments/, e.g. 'phq9', 'iri', 'mfq30'."},
+        "instrument_version": {"type": "string"},
+        "item_responses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["item_id", "value"],
+            "properties": {
+              "item_id": {"type": "string"},
+              "value": {"type": ["number", "string", "boolean"]},
+              "rt_ms": {"type": "integer", "description": "Response time per item; useful for detecting careless responding or rumination on a particular item."}
+            }
+          }
+        },
+        "computed_subscales": {
+          "type": "object",
+          "description": "Subscale scores computed at administration time, per the instrument's published scoring algorithm. Cached for convenience; re-derivable from item_responses + the instrument spec.",
+          "additionalProperties": {"type": "number"}
+        },
+        "administration_context": {
+          "type": "object",
+          "properties": {
+            "trigger": {"type": "string", "enum": ["scheduled", "user_initiated", "coach_prompted"]},
+            "time_of_day_local": {"type": "string"},
+            "preceding_events_summary": {"type": "string"}
+          }
+        }
+      }
+    },
+
+    "cognitive_test_result_payload": {
+      "description": "Result of a built-in cognitive test (N-back, simple-RT, Stroop, Raven-style matrices). raw_data preserves trial-level data so re-analysis is possible.",
+      "type": "object",
+      "required": ["test_type", "primary_score"],
+      "properties": {
+        "test_type": {"type": "string", "enum": ["n_back", "dual_n_back", "digit_span", "simple_rt", "choice_rt", "stroop", "raven_matrices", "vocabulary", "trail_making", "go_no_go", "other"]},
+        "test_version": {"type": "string"},
+        "primary_score": {"type": "number"},
+        "secondary_scores": {"type": "object", "additionalProperties": {"type": "number"}},
+        "raw_data": {"type": "array", "items": {"type": "object", "additionalProperties": true}, "description": "Per-trial data. Shape depends on test_type."},
+        "duration_ms": {"type": "integer"},
+        "condition_tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Optional context the user or app tags onto the run, e.g. 'morning', 'post_coffee', 'after_workout', 'tired'. Lets the user later split scores by condition."
+        }
+      }
+    },
+
+    "purchase_transaction_payload": {
+      "description": "A single purchase, however ingested (manual entry, bank/card import, receipt scan). Categorization supports later analysis of spending patterns, donations, food/alcohol/etc.",
+      "type": "object",
+      "required": ["vendor", "amount_cents", "currency"],
+      "properties": {
+        "vendor": {"type": "string"},
+        "amount_cents": {"type": "integer"},
+        "currency": {"type": "string", "minLength": 3, "maxLength": 3},
+        "category": {"type": "string", "description": "User- or pipeline-assigned, e.g. 'fast_food', 'donation', 'pet_supplies', 'alcohol', 'subscription'."},
+        "items": {
+          "type": "array",
+          "items": {"type": "object", "properties": {"name": {"type": "string"}, "amount_cents": {"type": "integer"}, "category": {"type": "string"}}}
+        },
+        "payment_method": {"type": "string"},
+        "source_doc": {"type": "string", "description": "How this was ingested: 'manual', 'bank_csv', 'receipt_ocr', etc."}
+      }
+    },
+
+    "browse_search_query_payload": {
+      "description": "A search query the user issued (Google, DuckDuckGo, YouTube, Reddit, etc.). Captured via desktop browser-history collector or manual import. Topic categorization feeds the 'topics of recurring concern' analysis.",
+      "type": "object",
+      "required": ["query", "engine"],
+      "properties": {
+        "query": {"type": "string"},
+        "engine": {"type": "string"},
+        "results_clicked": {"type": "array", "items": {"type": "object", "properties": {"url": {"type": "string"}, "rank": {"type": "integer"}}}},
+        "topic_tags": {"type": "array", "items": {"type": "string"}, "description": "Pipeline-assigned topic categorization."}
+      }
+    },
+
+    "browse_page_visit_payload": {
+      "description": "A page visit captured from desktop browser history. Dwell and scroll metrics support reading-depth and topic-breadth subscales.",
+      "type": "object",
+      "required": ["url", "domain"],
+      "properties": {
+        "url": {"type": "string"},
+        "domain": {"type": "string"},
+        "title": {"type": "string"},
+        "dwell_ms": {"type": "integer"},
+        "scroll_depth_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "topic_tags": {"type": "array", "items": {"type": "string"}},
+        "category": {"type": "string", "description": "e.g. 'news', 'social', 'reference', 'long_form_article', 'video', 'shopping'"}
+      }
+    },
+
+    "coach_briefing_payload": {
+      "description": "The daily AI briefing on the home screen. Stored as a first-class event so it's queryable later — 'show me every time the coach flagged my sleep over the last six months'.",
+      "type": "object",
+      "required": ["date", "persona_id", "sections"],
+      "properties": {
+        "date": {"type": "string", "description": "ISO date this briefing is about (typically the day just past)."},
+        "persona_id": {"type": "string"},
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["section_type", "text"],
+            "properties": {
+              "section_type": {
+                "type": "string",
+                "enum": ["bottom_line", "pattern_validation", "new_pattern", "contradiction", "anomaly", "concern", "open_question"]
+              },
+              "text": {"type": "string"},
+              "supporting_event_ids": {"type": "array", "items": {"type": "integer"}},
+              "supporting_query": {"type": "string"}
+            }
+          }
+        },
+        "flags": {
+          "type": "array",
+          "description": "Structured flags surfaced inside the briefing — for later querying without parsing prose. Suicidality, withdrawal, scale-crash, etc.",
+          "items": {
+            "type": "object",
+            "required": ["category", "severity"],
+            "properties": {
+              "category": {"type": "string", "enum": ["suicidality", "self_harm", "depression_severity", "anxiety_severity", "substance_use", "social_withdrawal", "sleep_disruption", "physical_pain", "scale_crash", "other"]},
+              "severity": {"type": "string", "enum": ["info", "watch", "concern", "urgent"]},
+              "source_event_ids": {"type": "array", "items": {"type": "integer"}},
+              "notes": {"type": "string"}
+            }
+          }
+        },
+        "open_questions": {"type": "array", "items": {"type": "string"}, "description": "Things the system can't tell on its own and wants the user to address in tomorrow's journal."},
+        "model_id": {"type": "string", "description": "LLM that generated the briefing (e.g. 'claude-opus-4-7', 'local-ollama-llama3')."},
+        "tokens_used": {"type": "integer"}
+      }
+    },
+
+    "coach_flag_payload": {
+      "description": "A standalone flag emitted outside the daily briefing context (e.g. by a real-time pipeline noticing a journal entry mentioned suicidality). Same shape as flags inside coach.briefing.",
+      "type": "object",
+      "required": ["category", "severity"],
+      "properties": {
+        "category": {"type": "string"},
+        "severity": {"type": "string", "enum": ["info", "watch", "concern", "urgent"]},
+        "source_event_ids": {"type": "array", "items": {"type": "integer"}},
+        "notes": {"type": "string"}
+      }
+    },
+
+    "coach_hypothesis_test_payload": {
+      "description": "Result of testing a self-hypothesis (extracted from a journal_entry) against the event log. e.g. user said 'I always eat junk after a run' — this event records: tested over the last 90 days, 11 of 14 post-run windows showed fast-food/sugar logs, status=supported.",
+      "type": "object",
+      "required": ["source_journal_event_id", "claim", "test_status"],
+      "properties": {
+        "source_journal_event_id": {"type": "integer"},
+        "claim": {"type": "string"},
+        "scope_window": {"type": "string"},
+        "test_status": {"type": "string", "enum": ["supported", "refuted", "partial", "untestable", "insufficient_data"]},
+        "evidence_summary": {"type": "string"},
+        "supporting_event_ids": {"type": "array", "items": {"type": "integer"}},
+        "counter_event_ids": {"type": "array", "items": {"type": "integer"}},
+        "n_observations": {"type": "integer"},
+        "n_supporting": {"type": "integer"}
+      }
     }
   }
 }
