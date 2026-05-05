@@ -6,7 +6,7 @@ This document describes Panopticon's system design at the level a forker needs t
 
 Panopticon is a **monorepo** containing:
 
-1. A **Flutter mobile app** (`android/`) targeting Android, with a Kotlin native layer for the OS-level collectors.
+1. A **Flutter mobile app** (`android/`) targeting Android (full feature scope) and iOS (degraded-feature client — see [iOS positioning](#ios-positioning) below). Kotlin native layer for the Android-side OS collectors.
 2. A **Python desktop collector** (`desktop-collector/`) that runs on the user's computer. *(Phase 4 — not present yet.)*
 3. A **canonical schema** (`schema/`) defining the JSON shape of every event, context document, and insight.
 4. **Coaching prompts** (`prompts/`) — system prompts, persona definitions, and trauma-informed framing for the AI layer. *(Phase 5.)*
@@ -93,7 +93,7 @@ Three screens in Phase 1:
 - **Permissions** — status of every permission with deep links.
 - **Privacy** — list of all collected data, "export everything as JSON" and "delete everything" buttons.
 
-State management: Riverpod. *(This is a soft commitment; we may revisit before the UI grows complex. Documented as a decision point.)*
+**State management: Riverpod.** Locked in. Reasoning: compile-safe provider lookup catches missing-provider errors at build time rather than at runtime; reads don't require `BuildContext` (easier to unit-test); mature dev tooling in Flutter Inspector; robust code generation via `riverpod_generator`. Bloc is a reasonable alternative; the differences are small enough that picking one and committing matters more than which.
 
 ## Architecture decisions (Phase 1)
 
@@ -116,6 +116,16 @@ Panopticon does not phone home. Ever. Crash reporting, telemetry, "anonymous usa
 ### Why Flutter for desktop UI later?
 
 Originally the brief specified a Python *collector* for desktop and a Flutter *UI* for mobile. We're planning to extend the Flutter UI to desktop targets (Windows / macOS / Linux) so a single codebase serves both. The Python collector remains the headless data source on desktop.
+
+### iOS positioning
+
+iOS does not allow the equivalent of Panopticon's Android system collectors. Accessibility access is heavily restricted, there is no NotificationListener equivalent, and `UsageStatsManager` has no analogue. So iOS is positioned as a **degraded-feature client**, sharing the Flutter codebase with Android but with a smaller feature scope:
+
+- **Phase 1 on iOS**: a "view your data" client. No passive collection. Reads aggregates from the home server via sync.
+- **Phase 2+ on iOS**: manual journaling, screening intake, HealthKit-equivalent of Health Connect ingestion, viewing insights.
+- **Never on iOS**: the Android-style system collectors, because the platform doesn't allow them.
+
+The Flutter project is created with both `android` and `ios` platforms from day one — forkers on iPhones can clone, build, and run a useful subset without further work on our part. iOS is not "second-class"; it's "different feature scope, shared codebase."
 
 ## Extending the system
 

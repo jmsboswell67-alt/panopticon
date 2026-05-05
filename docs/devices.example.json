@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "_comment_purpose": "Example device allowlist for Panopticon's home network DNS logger. Copy this file to personal/devices.json (gitignored) and replace example entries with your own devices' MAC addresses. Only include devices that belong to YOU. Devices not in the allowlist have their DNS records dropped at ingestion. This enforces the ETHICS.md hard rail: no surveillance of other people.",
+  "_comment_mac_rotation": "Modern Android (10+) and iOS rotate MAC addresses per-network by default. The MAC you see on your home network for a given phone is stable across reconnections AS LONG AS the per-network MAC is enabled. If you reset network settings or factory-reset, the MAC will change and the allowlist needs updating.",
+  "_comment_finding_macs": "On AdGuard Home / Pi-hole, connect each of your devices to the home network and look at the DHCP leases or the resolver's client list. Note each device's MAC. Add only your own devices below.",
+  "allowlist": [
+    {
+      "mac": "AA:BB:CC:DD:EE:01",
+      "label": "my pixel phone",
+      "notes": "Replace with the actual MAC; check Settings → About phone → Status → WiFi MAC address (randomized per-network MAC)."
+    },
+    {
+      "mac": "AA:BB:CC:DD:EE:02",
+      "label": "my desktop ethernet",
+      "notes": "Wired connection; MAC is stable. ip addr show / ipconfig /all to find it."
+    },
+    {
+      "mac": "AA:BB:CC:DD:EE:03",
+      "label": "my laptop wifi",
+      "notes": "Per-network randomized MAC. Update if you reset network settings."
+    }
+  ],
+  "explicit_exclusions": [
+    {
+      "mac": "AA:BB:CC:DD:EE:99",
+      "label": "shared TV",
+      "reason": "Shared device used by multiple people in the household. Data is contaminated by others' viewing patterns."
+    },
+    {
+      "mac": "AA:BB:CC:DD:EE:98",
+      "label": "smart speaker",
+      "reason": "Captures voice from everyone in the room; not appropriate for self-instrumentation."
+    }
+  ],
+  "_comment_explicit_exclusions": "The explicit_exclusions array is documentation, not enforcement — anything not in the allowlist is dropped regardless. List excluded devices here so future-you remembers WHY they're excluded and doesn't accidentally re-add them when refreshing the allowlist."
+}

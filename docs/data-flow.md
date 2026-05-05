@@ -174,11 +174,11 @@ Modern Android (and iOS) ship with **encrypted DNS** enabled by default — Andr
 
 Three resolutions, in increasing order of completeness:
 
-### Option 1 — Disable Private DNS on the phone
+### Option 1 — Disable Private DNS on the phone *(project default)*
 
 Settings → Network & Internet → Private DNS → Off.
 
-- **Pro**: simple, immediate.
+- **Pro**: simple, immediate, zero ongoing maintenance.
 - **Con**: lowers DNS privacy on networks that aren't yours. On public WiFi, your DNS queries travel in plaintext.
 
 ### Option 2 — Run your own DoH/DoT server
@@ -195,7 +195,11 @@ Block port 853 (DoT) and known DoH endpoints at the router. Forces phones to fal
 - **Pro**: works for all home devices, no per-device config.
 - **Con**: home-network-only. Cellular DNS is invisible. Some apps actively detect and complain about DoH being blocked.
 
-Option 2 is the "right" answer if you want comprehensive logging. Option 1 is the quick start for getting useful data fast. Document whichever you chose in your local config and revisit annually as Android's DNS handling evolves.
+**Project default: Option 1.** The reasoning: most behavioral activity happens at home, and off-home phone usage is approximated well enough by the OS-level collectors (app foreground time, notifications). DNS is supplementary signal, not primary. Building the DoH endpoint before validating that the off-home DNS data is actually useful would be premature.
+
+Option 2 is the documented upgrade path. If after a few months of using Panopticon you find yourself wanting DNS data from coffee shops, hotels, or office WiFi — switch to Option 2 then. Option 1 does not lock anything out; the upgrade is clean.
+
+Option 3 is included for completeness but is not recommended: home-only coverage with high maintenance overhead and false-positive impact on legitimate apps.
 
 ---
 

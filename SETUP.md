@@ -66,6 +66,29 @@ cp schema/context.schema.json personal/context.json
 
 `personal/` will never be tracked by git. Verify with `git status` before any commit.
 
+## (Phase 4+) Configure your device allowlist
+
+If you intend to enable home network DNS monitoring, Panopticon's network logger drops every record on ingestion unless the source device is in your configured allowlist. This is the [`ETHICS.md`](ETHICS.md) "no surveillance of other people" rail enforced operationally.
+
+Copy the example allowlist and fill it in for **your own devices only**:
+
+```bash
+cp docs/devices.example.json personal/devices.json
+# Edit personal/devices.json with your devices' MAC addresses.
+```
+
+If others share your home network (partner, roommate, family), do **not** add their devices to the allowlist. Either filter to your own MACs only, or disable network monitoring entirely. See [`docs/data-flow.md`](docs/data-flow.md) for the third-party data rail.
+
+`personal/devices.json` is gitignored. The `docs/devices.example.json` template stays in the repo so forkers know the format.
+
+## (Phase 4+) Disable Private DNS on your phone
+
+For your phone's DNS queries to be captured by your home server, Android's encrypted DNS must be disabled (or pointed at your own DoH endpoint, which is a more involved alternative path).
+
+On Android: **Settings → Network & Internet → Private DNS → Off**.
+
+This affects only your phone's DNS resolution preferences; it does not weaken any other security on your device. On home WiFi, DNS goes to your home server. On other networks, DNS goes to that network's default resolver (we don't capture off-home queries — see [`docs/data-flow.md`](docs/data-flow.md) for the upgrade path if you want to change that later).
+
 ## (Phase 5+) Configure an LLM backend
 
 When the coaching layer ships in Phase 5, copy `.env.example` to `.env` and fill in **one** of:
