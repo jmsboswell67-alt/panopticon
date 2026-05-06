@@ -102,12 +102,35 @@ class InstrumentRepository {
   }
 
   Future<List<InstrumentAdministration>> administrationsFor(String instrumentId) async {
+    final rows = await _allInstrumentResponseRows();
+    return _filterAdministrations(rows, instrumentId);
+  }
+
+  /// Live-updating administrations for an instrument. Useful for the
+  /// instrument detail screen to refresh after delete/save without
+  /// invalidating providers manually.
+  Stream<List<InstrumentAdministration>> watchAdministrationsFor(String instrumentId) {
     final query = _db.select(_db.events)
       ..where((t) =>
           t.source.equals(EventSource.instrument) &
-          t.eventType.equals('response'))
+          t.eventType.equals(InstrumentEventType.response))
       ..orderBy([(t) => OrderingTerm.desc(t.timestampUtc)]);
-    final rows = await query.get();
+    return query.watch().map((rows) => _filterAdministrations(rows, instrumentId));
+  }
+
+  Future<List<Event>> _allInstrumentResponseRows() {
+    final q = _db.select(_db.events)
+      ..where((t) =>
+          t.source.equals(EventSource.instrument) &
+          t.eventType.equals(InstrumentEventType.response))
+      ..orderBy([(t) => OrderingTerm.desc(t.timestampUtc)]);
+    return q.get();
+  }
+
+  List<InstrumentAdministration> _filterAdministrations(
+    List<Event> rows,
+    String instrumentId,
+  ) {
     final out = <InstrumentAdministration>[];
     for (final r in rows) {
       final p = r.payloadJson;
@@ -116,10 +139,18 @@ class InstrumentRepository {
         final decoded = jsonDecode(p) as Map<String, dynamic>;
         if (decoded['instrument_id'] != instrumentId) continue;
         final subs = (decoded['computed_subscales'] as Map?)?.cast<String, num>() ?? const {};
+        final items = (decoded['item_responses'] as List?) ?? const [];
         out.add(InstrumentAdministration(
           eventId: r.id,
           at: DateTime.fromMillisecondsSinceEpoch(r.timestampUtc),
           subscaleScores: {for (final e in subs.entries) e.key: e.value.toDouble()},
+          itemResponses: items.map((e) {
+            final m = (e as Map).cast<String, dynamic>();
+            return ItemResponseRecord(
+              itemId: m['item_id'] as String,
+              value: m['value'],
+            );
+          }).toList(),
         ));
       } catch (_) {
         continue;
@@ -127,6 +158,11 @@ class InstrumentRepository {
     }
     return out;
   }
+
+  /// Delete a single administration and any coach.flag events that
+  /// referenced it.
+  Future<int> deleteAdministration(int eventId) =>
+      _events.deleteEventCascade(eventId);
 }
 
 class InstrumentSaveResult {
@@ -145,8 +181,16 @@ class InstrumentAdministration {
     required this.eventId,
     required this.at,
     required this.subscaleScores,
+    this.itemResponses = const [],
   });
   final int eventId;
   final DateTime at;
   final Map<String, double> subscaleScores;
+  final List<ItemResponseRecord> itemResponses;
+}
+
+class ItemResponseRecord {
+  ItemResponseRecord({required this.itemId, required this.value});
+  final String itemId;
+  final Object? value;
 }

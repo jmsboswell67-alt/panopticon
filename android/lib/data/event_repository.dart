@@ -144,4 +144,56 @@ class EventRepository {
     await _db.delete(_db.dailyRollups).go();
     return _db.delete(_db.events).go();
   }
+
+  Future<Event?> findEvent(int id) async {
+    final q = _db.select(_db.events)..where((t) => t.id.equals(id))..limit(1);
+    final rows = await q.get();
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  /// Update only the payload + timestamp on an existing event row. Used by
+  /// edit flows for manual.* entries; preserves source/event_type/id.
+  Future<void> updateEventPayload({
+    required int id,
+    Map<String, dynamic>? payload,
+    int? timestampUtc,
+    int? timezoneOffset,
+  }) async {
+    final encoded = payload == null ? null : jsonEncode(payload);
+    await (_db.update(_db.events)..where((t) => t.id.equals(id))).write(
+      EventsCompanion(
+        payloadJson: Value(encoded),
+        timestampUtc:
+            timestampUtc == null ? const Value.absent() : Value(timestampUtc),
+        timezoneOffset:
+            timezoneOffset == null ? const Value.absent() : Value(timezoneOffset),
+      ),
+    );
+  }
+
+  /// Delete a single event and any coach.flag events that reference it via
+  /// payload.source_event_ids. Returns the total rows deleted.
+  Future<int> deleteEventCascade(int id) async {
+    final flags = await (_db.select(_db.events)
+          ..where((t) =>
+              t.source.equals(EventSource.coach) &
+              t.eventType.equals(CoachEventType.flag)))
+        .get();
+    var removed = 0;
+    for (final f in flags) {
+      final p = f.payloadJson;
+      if (p == null) continue;
+      try {
+        final decoded = jsonDecode(p) as Map<String, dynamic>;
+        final ids = decoded['source_event_ids'];
+        if (ids is List && ids.contains(id)) {
+          removed += await (_db.delete(_db.events)..where((t) => t.id.equals(f.id))).go();
+        }
+      } catch (_) {
+        continue;
+      }
+    }
+    removed += await (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+    return removed;
+  }
 }

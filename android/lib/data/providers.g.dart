@@ -392,6 +392,156 @@ class _LastAdministeredProviderElement
   String get instrumentId => (origin as LastAdministeredProvider).instrumentId;
 }
 
+String _$instrumentAdministrationsHash() =>
+    r'23fe2f74863617839b9c16c0bbce29cadf644aae';
+
+/// See also [instrumentAdministrations].
+@ProviderFor(instrumentAdministrations)
+const instrumentAdministrationsProvider = InstrumentAdministrationsFamily();
+
+/// See also [instrumentAdministrations].
+class InstrumentAdministrationsFamily
+    extends Family<AsyncValue<List<InstrumentAdministration>>> {
+  /// See also [instrumentAdministrations].
+  const InstrumentAdministrationsFamily();
+
+  /// See also [instrumentAdministrations].
+  InstrumentAdministrationsProvider call(String instrumentId) {
+    return InstrumentAdministrationsProvider(instrumentId);
+  }
+
+  @override
+  InstrumentAdministrationsProvider getProviderOverride(
+    covariant InstrumentAdministrationsProvider provider,
+  ) {
+    return call(provider.instrumentId);
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'instrumentAdministrationsProvider';
+}
+
+/// See also [instrumentAdministrations].
+class InstrumentAdministrationsProvider
+    extends AutoDisposeStreamProvider<List<InstrumentAdministration>> {
+  /// See also [instrumentAdministrations].
+  InstrumentAdministrationsProvider(String instrumentId)
+    : this._internal(
+        (ref) => instrumentAdministrations(
+          ref as InstrumentAdministrationsRef,
+          instrumentId,
+        ),
+        from: instrumentAdministrationsProvider,
+        name: r'instrumentAdministrationsProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$instrumentAdministrationsHash,
+        dependencies: InstrumentAdministrationsFamily._dependencies,
+        allTransitiveDependencies:
+            InstrumentAdministrationsFamily._allTransitiveDependencies,
+        instrumentId: instrumentId,
+      );
+
+  InstrumentAdministrationsProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.instrumentId,
+  }) : super.internal();
+
+  final String instrumentId;
+
+  @override
+  Override overrideWith(
+    Stream<List<InstrumentAdministration>> Function(
+      InstrumentAdministrationsRef provider,
+    )
+    create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: InstrumentAdministrationsProvider._internal(
+        (ref) => create(ref as InstrumentAdministrationsRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        instrumentId: instrumentId,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeStreamProviderElement<List<InstrumentAdministration>>
+  createElement() {
+    return _InstrumentAdministrationsProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is InstrumentAdministrationsProvider &&
+        other.instrumentId == instrumentId;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, instrumentId.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin InstrumentAdministrationsRef
+    on AutoDisposeStreamProviderRef<List<InstrumentAdministration>> {
+  /// The parameter `instrumentId` of this provider.
+  String get instrumentId;
+}
+
+class _InstrumentAdministrationsProviderElement
+    extends AutoDisposeStreamProviderElement<List<InstrumentAdministration>>
+    with InstrumentAdministrationsRef {
+  _InstrumentAdministrationsProviderElement(super.provider);
+
+  @override
+  String get instrumentId =>
+      (origin as InstrumentAdministrationsProvider).instrumentId;
+}
+
+String _$manualEntriesHash() => r'd4b6b24c5519c5d68c94bed9ce7b6cdfc5b24847';
+
+/// See also [manualEntries].
+@ProviderFor(manualEntries)
+final manualEntriesProvider = AutoDisposeStreamProvider<List<Event>>.internal(
+  manualEntries,
+  name: r'manualEntriesProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$manualEntriesHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ManualEntriesRef = AutoDisposeStreamProviderRef<List<Event>>;
 String _$totalEventCountHash() => r'b15638d906a1b99eefc405c3c351e0be01f7ce6e';
 
 /// See also [totalEventCount].

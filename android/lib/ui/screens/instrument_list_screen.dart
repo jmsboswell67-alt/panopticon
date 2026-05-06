@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../data/providers.dart';
 import '../../instruments/instrument.dart';
-import 'instrument_runner_screen.dart';
+import 'instrument_detail_screen.dart';
 
 class InstrumentListScreen extends ConsumerWidget {
   const InstrumentListScreen({super.key});
@@ -75,7 +75,7 @@ class _InstrumentCard extends ConsumerWidget {
         ),
         trailing: const Icon(Icons.chevron_right),
         isThreeLine: true,
-        onTap: () => InstrumentRunnerScreen.push(context, instrument),
+        onTap: () => InstrumentDetailScreen.push(context, instrument),
       ),
     );
   }

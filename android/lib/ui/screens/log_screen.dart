@@ -7,11 +7,12 @@ import 'crisis_screen.dart';
 import 'daily_checkin_screen.dart';
 import 'instrument_list_screen.dart';
 import 'journal_entry_screen.dart';
-import 'observed_interaction_screen.dart';
+import 'manual_history_screen.dart';
+import 'notable_event_screen.dart';
 
-/// The "Log" tab — the place where the user puts data IN to Panopticon
-/// (passive collection happens elsewhere). Lists the entry surfaces:
-/// daily check-in, journal entry, observed interaction, instruments.
+/// "Log" tab — where the user puts data IN (passive collection happens
+/// elsewhere). Quick-entry tiles + an instruments shortcut + recent
+/// activity preview that links into the full history.
 class LogScreen extends ConsumerWidget {
   const LogScreen({super.key});
 
@@ -50,11 +51,11 @@ class LogScreen extends ConsumerWidget {
                   onTap: () => JournalEntryScreen.push(context),
                 ),
                 _Tile(
-                  icon: Icons.bolt_outlined,
-                  title: 'Observed interaction',
+                  icon: Icons.bookmark_outline,
+                  title: 'Notable event',
                   subtitle:
-                      'Timestamp a moment — interaction with a person or animal.',
-                  onTap: () => ObservedInteractionScreen.push(context),
+                      'A milestone, loss, change, conflict — backdate with the calendar.',
+                  onTap: () => NotableEventScreen.push(context),
                 ),
               ],
             ),
@@ -65,16 +66,25 @@ class LogScreen extends ConsumerWidget {
                   icon: Icons.assignment_outlined,
                   title: 'Browse all instruments',
                   subtitle:
-                      'PHQ-9, GAD-7, WHO-5, IRI, MFQ-30 — cadence varies. Each shows tier & last administered.',
+                      'PHQ-9, GAD-7, WHO-5, IRI, MFQ-30 — each with its own history.',
                   onTap: () => Navigator.of(context).push<void>(
                     MaterialPageRoute(builder: (_) => const InstrumentListScreen()),
                   ),
                 ),
               ],
             ),
-            const _Section(
-              title: 'Recent activity',
-              children: [_RecentActivity()],
+            _Section(
+              title: 'History',
+              children: [
+                _Tile(
+                  icon: Icons.history,
+                  title: 'Browse, edit, delete past entries',
+                  subtitle:
+                      'All journal entries, check-ins, and notable events.',
+                  onTap: () => ManualHistoryScreen.push(context),
+                ),
+                const _RecentSnapshot(),
+              ],
             ),
             const SizedBox(height: 32),
           ],
@@ -135,8 +145,8 @@ class _Tile extends StatelessWidget {
   }
 }
 
-class _RecentActivity extends ConsumerWidget {
-  const _RecentActivity();
+class _RecentSnapshot extends ConsumerWidget {
+  const _RecentSnapshot();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -147,11 +157,14 @@ class _RecentActivity extends ConsumerWidget {
             e == null ? null : DateTime.fromMillisecondsSinceEpoch(e.timestampUtc)),
         manual.latestCheckin().then((e) =>
             e == null ? null : DateTime.fromMillisecondsSinceEpoch(e.timestampUtc)),
+        manual.latestNotableEvent().then((e) =>
+            e == null ? null : DateTime.fromMillisecondsSinceEpoch(e.timestampUtc)),
       ]),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return const SizedBox(height: 24);
         final lastJournal = snapshot.data![0];
         final lastCheckin = snapshot.data![1];
+        final lastNotable = snapshot.data![2];
         String fmt(DateTime? t) =>
             t == null ? 'never' : DateFormat.yMMMd().add_jm().format(t);
         return Card(
@@ -164,6 +177,8 @@ class _RecentActivity extends ConsumerWidget {
                 Text('Last journal entry: ${fmt(lastJournal)}'),
                 const SizedBox(height: 4),
                 Text('Last check-in: ${fmt(lastCheckin)}'),
+                const SizedBox(height: 4),
+                Text('Last notable event: ${fmt(lastNotable)}'),
               ],
             ),
           ),

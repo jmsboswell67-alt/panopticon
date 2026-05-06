@@ -66,6 +66,21 @@ Future<DateTime?> lastAdministered(Ref ref, String instrumentId) {
 }
 
 @riverpod
+Stream<List<InstrumentAdministration>> instrumentAdministrations(
+  Ref ref,
+  String instrumentId,
+) {
+  return ref
+      .watch(instrumentRepositoryProvider)
+      .watchAdministrationsFor(instrumentId);
+}
+
+@riverpod
+Stream<List<Event>> manualEntries(Ref ref) {
+  return ref.watch(manualRepositoryProvider).watchManualEntries();
+}
+
+@riverpod
 Stream<int> totalEventCount(Ref ref) {
   return ref.watch(eventRepositoryProvider).watchTotalEventCount();
 }

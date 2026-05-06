@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/database.dart';
 import '../../data/manual_repository.dart';
 import '../../data/providers.dart';
 import '../../instruments/instrument.dart';
 import 'crisis_screen.dart';
 
-/// The daily check-in is just the daily_scales instrument, but persisted as
-/// a `manual.daily_checkin` event (per the schema) rather than as an
-/// `instrument.response` event.
+/// The daily check-in is the daily_scales instrument, persisted as a
+/// `manual.daily_checkin` event (per the schema). Supports both new
+/// administrations and editing a previous one.
 class DailyCheckinScreen extends ConsumerWidget {
-  const DailyCheckinScreen({super.key});
+  const DailyCheckinScreen({super.key, this.editing});
 
-  static Future<void> push(BuildContext context) {
+  /// When non-null, edits this existing check-in event instead of creating
+  /// a new one.
+  final Event? editing;
+
+  static Future<void> push(BuildContext context, {Event? editing}) {
     return Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => const DailyCheckinScreen()),
+      MaterialPageRoute(builder: (_) => DailyCheckinScreen(editing: editing)),
     );
   }
 
@@ -23,7 +28,7 @@ class DailyCheckinScreen extends ConsumerWidget {
     final asyncInstr = ref.watch(instrumentByIdProvider('daily_scales'));
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily check-in'),
+        title: Text(editing == null ? 'Daily check-in' : 'Edit check-in'),
         actions: [
           IconButton(
             tooltip: 'Crisis resources',
@@ -36,7 +41,8 @@ class DailyCheckinScreen extends ConsumerWidget {
         child: asyncInstr.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('Failed to load: $e')),
-          data: (instrument) => _CheckinForm(instrument: instrument),
+          data: (instrument) =>
+              _CheckinForm(instrument: instrument, editing: editing),
         ),
       ),
     );
@@ -44,8 +50,9 @@ class DailyCheckinScreen extends ConsumerWidget {
 }
 
 class _CheckinForm extends ConsumerStatefulWidget {
-  const _CheckinForm({required this.instrument});
+  const _CheckinForm({required this.instrument, required this.editing});
   final Instrument instrument;
+  final Event? editing;
 
   @override
   ConsumerState<_CheckinForm> createState() => _CheckinFormState();
@@ -55,6 +62,24 @@ class _CheckinFormState extends ConsumerState<_CheckinForm> {
   final Map<String, Object?> _values = {};
   final Set<String> _skipped = {};
   bool _saving = false;
+  late DateTime _at;
+
+  @override
+  void initState() {
+    super.initState();
+    _at = widget.editing == null
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(widget.editing!.timestampUtc);
+    if (widget.editing != null) {
+      for (final s in ManualPayloads.checkinScales(widget.editing!)) {
+        if (s.skipped) {
+          _skipped.add(s.scaleId);
+        } else {
+          _values[s.scaleId] = s.value;
+        }
+      }
+    }
+  }
 
   bool _isEndorsedSafetyCritical(InstrumentItem item, Object? value) {
     if (!item.safetyCritical) return false;
@@ -82,6 +107,17 @@ class _CheckinFormState extends ConsumerState<_CheckinForm> {
     }
   }
 
+  void _toggleSkip(InstrumentItem item) {
+    setState(() {
+      if (_skipped.contains(item.id)) {
+        _skipped.remove(item.id);
+      } else {
+        _skipped.add(item.id);
+        _values.remove(item.id);
+      }
+    });
+  }
+
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
@@ -95,11 +131,22 @@ class _CheckinFormState extends ConsumerState<_CheckinForm> {
         if (v == null) continue;
         scales.add(DailyCheckinScale(scaleId: item.id, value: v));
       }
-      await ref.read(manualRepositoryProvider).saveDailyCheckin(scales: scales);
+      final repo = ref.read(manualRepositoryProvider);
+      if (widget.editing == null) {
+        await repo.saveDailyCheckin(scales: scales, at: _at);
+      } else {
+        await repo.updateDailyCheckin(
+          eventId: widget.editing!.id,
+          scales: scales,
+          at: _at,
+        );
+      }
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Saved ${scales.length} response(s).')),
+        SnackBar(content: Text(widget.editing == null
+            ? 'Saved ${scales.length} response(s).'
+            : 'Updated check-in.')),
       );
     } catch (e) {
       if (!mounted) return;
@@ -121,23 +168,75 @@ class _CheckinFormState extends ConsumerState<_CheckinForm> {
           i.purpose,
           style: Theme.of(context).textTheme.bodySmall,
         ),
-        const SizedBox(height: 16),
-        for (final item in i.allItems) _Row(
-          item: item,
-          value: _values[item.id],
-          skipped: _skipped.contains(item.id),
-          onChanged: (v) => _set(item, v),
-          onSkip: () => setState(() {
-            _skipped.add(item.id);
-            _values.remove(item.id);
-          }),
+        const SizedBox(height: 12),
+        _DateTimePickerTile(
+          value: _at,
+          label: 'When this check-in is for',
+          onChanged: (d) => setState(() => _at = d),
         ),
+        const SizedBox(height: 8),
+        for (final item in i.allItems)
+          _Row(
+            item: item,
+            value: _values[item.id],
+            skipped: _skipped.contains(item.id),
+            onChanged: (v) => _set(item, v),
+            onToggleSkip: () => _toggleSkip(item),
+          ),
         const SizedBox(height: 16),
         FilledButton(
           onPressed: _saving ? null : _save,
-          child: Text(_saving ? 'Saving…' : 'Save check-in'),
+          child: Text(_saving
+              ? 'Saving…'
+              : widget.editing == null ? 'Save check-in' : 'Update check-in'),
         ),
       ],
+    );
+  }
+}
+
+class _DateTimePickerTile extends StatelessWidget {
+  const _DateTimePickerTile({
+    required this.value,
+    required this.label,
+    required this.onChanged,
+  });
+
+  final DateTime value;
+  final String label;
+  final ValueChanged<DateTime> onChanged;
+
+  Future<void> _pick(BuildContext context) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: value,
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+    );
+    if (date == null) return;
+    if (!context.mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(value),
+    );
+    if (time == null) return;
+    onChanged(DateTime(date.year, date.month, date.day, time.hour, time.minute));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.event_outlined),
+        title: Text(label),
+        subtitle: Text(
+          '${value.year}-${value.month.toString().padLeft(2, '0')}-${value.day.toString().padLeft(2, '0')}'
+          '  '
+          '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}',
+        ),
+        trailing: const Icon(Icons.edit_calendar),
+        onTap: () => _pick(context),
+      ),
     );
   }
 }
@@ -148,14 +247,14 @@ class _Row extends StatelessWidget {
     required this.value,
     required this.skipped,
     required this.onChanged,
-    required this.onSkip,
+    required this.onToggleSkip,
   });
 
   final InstrumentItem item;
   final Object? value;
   final bool skipped;
   final ValueChanged<Object?> onChanged;
-  final VoidCallback onSkip;
+  final VoidCallback onToggleSkip;
 
   @override
   Widget build(BuildContext context) {
@@ -176,17 +275,15 @@ class _Row extends StatelessWidget {
                         color: Theme.of(context).colorScheme.error, size: 18),
                   ),
                 IconButton(
-                  tooltip: 'Skip',
-                  icon: Icon(skipped
-                      ? Icons.check_circle
-                      : Icons.skip_next_outlined),
-                  onPressed: onSkip,
+                  tooltip: skipped ? 'Undo skip' : 'Skip',
+                  icon: Icon(skipped ? Icons.undo : Icons.skip_next_outlined),
+                  onPressed: onToggleSkip,
                 ),
               ],
             ),
             if (skipped)
               Text(
-                'Skipped — the skip itself is a signal.',
+                'Skipped — tap the undo arrow to answer it again.',
                 style: Theme.of(context).textTheme.bodySmall,
               )
             else

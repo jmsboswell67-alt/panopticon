@@ -66,7 +66,7 @@
       "notification": ["notification_posted", "notification_removed"],
       "usagestats": ["daily_summary"],
       "desktop": ["active_window_changed", "browser_history_imported", "keystroke_rollup"],
-      "manual": ["journal_entry", "daily_checkin", "observed_interaction", "user_note", "context_update"],
+      "manual": ["journal_entry", "daily_checkin", "observed_interaction", "notable_event", "user_note", "context_update"],
       "instrument": ["response"],
       "cognitive_test": ["result"],
       "purchase": ["transaction"],
@@ -154,6 +154,18 @@
         "intensity": {"type": "integer", "minimum": 1, "maximum": 5},
         "parties": {"type": "array", "items": {"type": "string"}, "description": "Free-form labels; the user defines what 'mom' or 'Cooper' resolves to."},
         "notes": {"type": "string"}
+      }
+    },
+
+    "manual_notable_event_payload": {
+      "description": "A discrete event in the user's life worth noting (a milestone, a loss, a change of circumstance, a conflict, a meaningful interaction). Backdated when needed — `timestamp_utc` is the event's actual occurrence time, not the log time. Free-form by design; categorization is optional and user-controlled.",
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": {"type": "string", "description": "Short label for the event."},
+        "description": {"type": "string", "description": "Optional longer description."},
+        "category": {"type": "string", "description": "Optional user-defined or suggested category, e.g. 'milestone', 'loss', 'change', 'conflict', 'win', 'medical'."},
+        "logged_at_utc": {"type": "integer", "description": "Epoch millis at which the user actually entered this event (distinct from `timestamp_utc`, which is when the event itself occurred). Useful for audit when entries are backdated."}
       }
     },
 

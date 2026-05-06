@@ -44,5 +44,33 @@ class UsageStatsEventType {
   static const dailySummary = 'daily_summary';
 }
 
+/// Manual entry event_type values.
+class ManualEventType {
+  ManualEventType._();
+
+  static const journalEntry = 'journal_entry';
+  static const dailyCheckin = 'daily_checkin';
+  static const observedInteraction = 'observed_interaction';
+  static const notableEvent = 'notable_event';
+  static const userNote = 'user_note';
+  static const contextUpdate = 'context_update';
+}
+
+/// Coach event_type values.
+class CoachEventType {
+  CoachEventType._();
+
+  static const briefing = 'briefing';
+  static const flag = 'flag';
+  static const hypothesisTest = 'hypothesis_test';
+}
+
+/// Instrument event_type values.
+class InstrumentEventType {
+  InstrumentEventType._();
+
+  static const response = 'response';
+}
+
 /// Current schema version emitted by collectors.
 const int kCurrentSchemaVersion = 1;

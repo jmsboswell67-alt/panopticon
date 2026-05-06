@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/database.dart';
+import '../../data/manual_repository.dart';
 import '../../data/providers.dart';
 import 'crisis_screen.dart';
 
 class JournalEntryScreen extends ConsumerStatefulWidget {
-  const JournalEntryScreen({super.key});
+  const JournalEntryScreen({super.key, this.editing});
 
-  static Future<void> push(BuildContext context) {
+  /// When non-null, edits this existing journal_entry event instead of
+  /// creating a new one.
+  final Event? editing;
+
+  static Future<void> push(BuildContext context, {Event? editing}) {
     return Navigator.of(context).push<void>(
-      MaterialPageRoute(builder: (_) => const JournalEntryScreen()),
+      MaterialPageRoute(builder: (_) => JournalEntryScreen(editing: editing)),
     );
   }
 
@@ -18,9 +24,21 @@ class JournalEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
-  final _ctrl = TextEditingController();
-  final _started = DateTime.now();
+  late final TextEditingController _ctrl;
+  late final DateTime _started;
+  late DateTime _at;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _started = DateTime.now();
+    _ctrl = TextEditingController(
+        text: widget.editing == null ? '' : ManualPayloads.journalText(widget.editing!));
+    _at = widget.editing == null
+        ? DateTime.now()
+        : DateTime.fromMillisecondsSinceEpoch(widget.editing!.timestampUtc);
+  }
 
   @override
   void dispose() {
@@ -34,11 +52,20 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
     setState(() => _saving = true);
     try {
       final repo = ref.read(manualRepositoryProvider);
-      final result = await repo.saveJournalEntry(
-        text: text,
-        completionSeconds:
-            DateTime.now().difference(_started).inSeconds,
-      );
+      final result = widget.editing == null
+          ? await repo.saveJournalEntry(
+              text: text,
+              completionSeconds:
+                  DateTime.now().difference(_started).inSeconds,
+              at: _at,
+            )
+          : await repo.updateJournalEntry(
+              eventId: widget.editing!.id,
+              text: text,
+              completionSeconds:
+                  DateTime.now().difference(_started).inSeconds,
+              at: _at,
+            );
 
       if (!mounted) return;
       if (result.pipeline.safety.isNotEmpty) {
@@ -53,7 +80,8 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              'Journal saved. ${result.pipeline.sections.length} section(s), '
+              '${widget.editing == null ? 'Saved' : 'Updated'}. '
+              '${result.pipeline.sections.length} section(s), '
               '${result.pipeline.selfHypotheses.length} self-hypothesis pattern(s) detected.'),
         ),
       );
@@ -67,11 +95,29 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
     }
   }
 
+  Future<void> _pickDateTime() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _at,
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 5)),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+    );
+    if (date == null) return;
+    if (!mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_at),
+    );
+    if (time == null) return;
+    setState(() => _at =
+        DateTime(date.year, date.month, date.day, time.hour, time.minute));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Journal entry'),
+        title: Text(widget.editing == null ? 'Journal entry' : 'Edit entry'),
         actions: [
           IconButton(
             tooltip: 'Crisis resources',
@@ -92,12 +138,25 @@ class _JournalEntryScreenState extends ConsumerState<JournalEntryScreen> {
             children: [
               Text(
                 'Free prose. Anything from a sentence to a few paragraphs. The '
-                'pipeline tags sections (food, sleep, work, social, etc.), pulls '
-                'out self-hypotheses ("I always X"), and computes some linguistic '
-                'metrics — without modifying what you wrote.',
+                'pipeline tags sections, pulls out self-hypotheses, and computes '
+                'linguistic metrics — without modifying what you wrote.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 12),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.event_outlined),
+                  title: const Text('Date this entry is for'),
+                  subtitle: Text(
+                    '${_at.year}-${_at.month.toString().padLeft(2, '0')}-${_at.day.toString().padLeft(2, '0')}'
+                    '  '
+                    '${_at.hour.toString().padLeft(2, '0')}:${_at.minute.toString().padLeft(2, '0')}',
+                  ),
+                  trailing: const Icon(Icons.edit_calendar),
+                  onTap: _pickDateTime,
+                ),
+              ),
+              const SizedBox(height: 8),
               Expanded(
                 child: TextField(
                   controller: _ctrl,
