@@ -127,6 +127,151 @@ final importServiceProvider = Provider<ImportService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ImportServiceRef = ProviderRef<ImportService>;
+String _$insightsRepositoryHash() =>
+    r'b3d1472911358f1d1ef0888739a0a9fa60fc71dc';
+
+/// See also [insightsRepository].
+@ProviderFor(insightsRepository)
+final insightsRepositoryProvider = Provider<InsightsRepository>.internal(
+  insightsRepository,
+  name: r'insightsRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$insightsRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef InsightsRepositoryRef = ProviderRef<InsightsRepository>;
+String _$topAppsTodayHash() => r'b39349cfbdbaa83011d74beadfa30afbbf37554a';
+
+/// See also [topAppsToday].
+@ProviderFor(topAppsToday)
+final topAppsTodayProvider =
+    AutoDisposeFutureProvider<List<AppUsageSlice>>.internal(
+      topAppsToday,
+      name: r'topAppsTodayProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$topAppsTodayHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TopAppsTodayRef = AutoDisposeFutureProviderRef<List<AppUsageSlice>>;
+String _$screenTimeWeekHash() => r'7806c64f2db9bb00fae4e811b9cf1c803d66b254';
+
+/// See also [screenTimeWeek].
+@ProviderFor(screenTimeWeek)
+final screenTimeWeekProvider =
+    AutoDisposeFutureProvider<List<DailyTotal>>.internal(
+      screenTimeWeek,
+      name: r'screenTimeWeekProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$screenTimeWeekHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ScreenTimeWeekRef = AutoDisposeFutureProviderRef<List<DailyTotal>>;
+String _$notificationsTodayHash() =>
+    r'27814287df359e3a7df0ad12877b8dadea07466f';
+
+/// See also [notificationsToday].
+@ProviderFor(notificationsToday)
+final notificationsTodayProvider =
+    AutoDisposeFutureProvider<List<NotificationCount>>.internal(
+      notificationsToday,
+      name: r'notificationsTodayProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$notificationsTodayHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef NotificationsTodayRef =
+    AutoDisposeFutureProviderRef<List<NotificationCount>>;
+String _$videoViewsMonthHash() => r'da7c796f8c48f47d9b4ee105f6fcefb16cd6141c';
+
+/// See also [videoViewsMonth].
+@ProviderFor(videoViewsMonth)
+final videoViewsMonthProvider =
+    AutoDisposeFutureProvider<List<DailyTotal>>.internal(
+      videoViewsMonth,
+      name: r'videoViewsMonthProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$videoViewsMonthHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef VideoViewsMonthRef = AutoDisposeFutureProviderRef<List<DailyTotal>>;
+String _$topChannelsHash() => r'0bc46574328ce6559695743e4e5afa0b272e20a1';
+
+/// See also [topChannels].
+@ProviderFor(topChannels)
+final topChannelsProvider =
+    AutoDisposeFutureProvider<List<NamedCount>>.internal(
+      topChannels,
+      name: r'topChannelsProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$topChannelsHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TopChannelsRef = AutoDisposeFutureProviderRef<List<NamedCount>>;
+String _$topArtistsHash() => r'4150cb5e33151bdecc2bc916772b8fb2addc7a24';
+
+/// See also [topArtists].
+@ProviderFor(topArtists)
+final topArtistsProvider = AutoDisposeFutureProvider<List<NamedCount>>.internal(
+  topArtists,
+  name: r'topArtistsProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$topArtistsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TopArtistsRef = AutoDisposeFutureProviderRef<List<NamedCount>>;
+String _$recentSearchesHash() => r'e471e59c37fa9f318df2bc23c9acc9eca7e86e4d';
+
+/// See also [recentSearches].
+@ProviderFor(recentSearches)
+final recentSearchesProvider =
+    AutoDisposeFutureProvider<List<RecentSearch>>.internal(
+      recentSearches,
+      name: r'recentSearchesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$recentSearchesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef RecentSearchesRef = AutoDisposeFutureProviderRef<List<RecentSearch>>;
 String _$textCaptureRepositoryHash() =>
     r'0667319c284d56546bbbf1e093cdfb9298aa3a4e';
 

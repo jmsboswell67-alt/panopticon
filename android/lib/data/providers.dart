@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../insights/insights_repository.dart';
 import '../instruments/instrument.dart';
 import '../instruments/instrument_loader.dart';
 import 'database.dart';
@@ -58,6 +59,48 @@ ImportService importService(Ref ref) {
     ref.watch(panopticonDatabaseProvider),
     ref.watch(eventRepositoryProvider),
   );
+}
+
+@Riverpod(keepAlive: true)
+InsightsRepository insightsRepository(Ref ref) {
+  return InsightsRepository(ref.watch(panopticonDatabaseProvider));
+}
+
+@riverpod
+Future<List<AppUsageSlice>> topAppsToday(Ref ref) {
+  return ref.watch(insightsRepositoryProvider).topAppsForDate(DateTime.now());
+}
+
+@riverpod
+Future<List<DailyTotal>> screenTimeWeek(Ref ref) {
+  return ref.watch(insightsRepositoryProvider).dailyScreenTime();
+}
+
+@riverpod
+Future<List<NotificationCount>> notificationsToday(Ref ref) {
+  return ref
+      .watch(insightsRepositoryProvider)
+      .notificationsByAppForDate(DateTime.now());
+}
+
+@riverpod
+Future<List<DailyTotal>> videoViewsMonth(Ref ref) {
+  return ref.watch(insightsRepositoryProvider).videoViewsPerDay();
+}
+
+@riverpod
+Future<List<NamedCount>> topChannels(Ref ref) {
+  return ref.watch(insightsRepositoryProvider).topChannels();
+}
+
+@riverpod
+Future<List<NamedCount>> topArtists(Ref ref) {
+  return ref.watch(insightsRepositoryProvider).topArtists();
+}
+
+@riverpod
+Future<List<RecentSearch>> recentSearches(Ref ref) {
+  return ref.watch(insightsRepositoryProvider).recentSearches();
 }
 
 @Riverpod(keepAlive: true)

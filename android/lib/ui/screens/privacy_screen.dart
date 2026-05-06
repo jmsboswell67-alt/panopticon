@@ -105,33 +105,32 @@ class PrivacyScreen extends ConsumerWidget {
     try {
       final repo = ref.read(eventRepositoryProvider);
       final events = await repo.allEvents();
-      final payload = events
-          .map((e) => {
-                'id': e.id,
-                'timestamp_utc': e.timestampUtc,
-                'timezone_offset': e.timezoneOffset,
-                'source': e.source,
-                'event_type': e.eventType,
-                'package_name': e.packageName,
-                'payload_json': e.payloadJson == null
-                    ? null
-                    : jsonDecode(e.payloadJson!),
-                'schema_version': e.schemaVersion,
-              })
-          .toList();
 
       final dir = await getTemporaryDirectory();
       final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-      final file = File(p.join(dir.path, 'panopticon-export-$stamp.json'));
-      await file.writeAsString(const JsonEncoder.withIndent('  ').convert({
-        'export_generated_at_utc': DateTime.now().toUtc().toIso8601String(),
-        'event_count': events.length,
-        'events': payload,
-      }));
+      // NDJSON — one event per line. Same shape as the desktop collector
+      // emits, so the Import screen accepts it without special-casing.
+      final file = File(p.join(dir.path, 'panopticon-export-$stamp.ndjson'));
+      final sink = file.openWrite();
+      try {
+        for (final e in events) {
+          sink.writeln(jsonEncode({
+            'timestamp_utc': e.timestampUtc,
+            'timezone_offset': e.timezoneOffset,
+            'source': e.source,
+            'event_type': e.eventType,
+            'package_name': e.packageName,
+            'payload_json': e.payloadJson == null ? null : jsonDecode(e.payloadJson!),
+            'schema_version': e.schemaVersion,
+          }));
+        }
+      } finally {
+        await sink.close();
+      }
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'Panopticon export',
+        subject: 'Panopticon export (${events.length} events)',
       );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Export failed: $e')));

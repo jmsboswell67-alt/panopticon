@@ -122,22 +122,34 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                     children: [
                       Text(p.basename(preview.file.path),
                           style: Theme.of(context).textTheme.titleMedium),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${NumberFormat.decimalPattern().format(preview.validCount)} '
-                        'event(s) ready to import',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
                       const SizedBox(height: 8),
-                      for (final entry in preview.eventTypeCounts.entries)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8, top: 2),
-                          child: Text(
-                            '· ${entry.key}: '
-                            '${NumberFormat.decimalPattern().format(entry.value)}',
-                            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                      _StatRow(
+                        label: 'Read from file',
+                        value: NumberFormat.decimalPattern().format(preview.totalLines),
+                      ),
+                      _StatRow(
+                        label: 'Already in your database',
+                        value: NumberFormat.decimalPattern().format(preview.duplicateCount),
+                        muted: true,
+                      ),
+                      _StatRow(
+                        label: 'New, ready to import',
+                        value: NumberFormat.decimalPattern().format(preview.validCount),
+                        emphasised: true,
+                      ),
+                      if (preview.eventTypeCounts.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        const Text('Breakdown of new events:'),
+                        for (final entry in preview.eventTypeCounts.entries)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8, top: 2),
+                            child: Text(
+                              '· ${entry.key}: '
+                              '${NumberFormat.decimalPattern().format(entry.value)}',
+                              style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                            ),
                           ),
-                        ),
+                      ],
                       if (preview.hasIssues) ...[
                         const SizedBox(height: 12),
                         Text(
@@ -166,15 +178,54 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Note: this Phase-3 import does not yet deduplicate. '
-                'If you re-import the same file you will get duplicate '
-                'events. Future versions will dedup on (source, event_type, '
-                'timestamp, payload-hash).',
+                'Re-imports are deduplicated by (source, event_type, '
+                'timestamp, payload-hash) — importing the same file twice '
+                'is safe and won\'t produce duplicates.',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  const _StatRow({
+    required this.label,
+    required this.value,
+    this.emphasised = false,
+    this.muted = false,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasised;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final color = muted ? cs.onSurfaceVariant : null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: color),
+            ),
+          ),
+          Text(
+            value,
+            style: (emphasised
+                    ? Theme.of(context).textTheme.titleMedium
+                    : Theme.of(context).textTheme.bodyLarge)
+                ?.copyWith(color: color),
+          ),
+        ],
       ),
     );
   }

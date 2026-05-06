@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'insights_screen.dart';
 import 'log_screen.dart';
 import 'permissions_screen.dart';
 import 'privacy_screen.dart';
@@ -16,8 +17,9 @@ class _HomeShellState extends State<HomeShell> {
   int _index = 0;
 
   static const _screens = <Widget>[
-    TodayScreen(),
+    InsightsScreen(),
     LogScreen(),
+    TodayScreen(),
     PermissionsScreen(),
     PrivacyScreen(),
   ];
@@ -31,14 +33,19 @@ class _HomeShellState extends State<HomeShell> {
         onDestinationSelected: (i) => setState(() => _index = i),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.today_outlined),
-            selectedIcon: Icon(Icons.today),
-            label: 'Today',
+            icon: Icon(Icons.insights_outlined),
+            selectedIcon: Icon(Icons.insights),
+            label: 'Insights',
           ),
           NavigationDestination(
             icon: Icon(Icons.add_box_outlined),
             selectedIcon: Icon(Icons.add_box),
             label: 'Log',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.list_alt_outlined),
+            selectedIcon: Icon(Icons.list_alt),
+            label: 'Raw log',
           ),
           NavigationDestination(
             icon: Icon(Icons.lock_outlined),
