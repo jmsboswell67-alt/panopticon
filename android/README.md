@@ -1,48 +1,75 @@
 # android/
 
-Flutter mobile app + native Android Kotlin layer. **To be scaffolded.**
+Flutter app + native Android Kotlin layer. **Phase 1 in place.**
 
-This directory is a placeholder. The actual Flutter project will be created via `flutter create` from a machine with the Android SDK and Android Studio installed (which the laptop session that initialized this repo did not have).
-
-## What goes here
+## What's here
 
 ```
 android/
-├── lib/                          # Flutter UI (Dart)
+├── lib/                                  # Flutter UI (Dart)
 │   ├── main.dart
-│   ├── ui/                       # Screens, widgets
-│   ├── data/                     # DB (Drift), repositories
-│   ├── coaching/                 # AI coaching layer (Phase 5)
-│   └── context/                  # User context schema, intake flow (Phase 2)
-├── android/                      # Native Kotlin
-│   └── app/src/main/kotlin/com/velovault/panopticon/
-│       ├── PanopticonApp.kt
-│       ├── PanopticonForegroundService.kt
-│       ├── services/             # Accessibility, NotificationListener
-│       └── collectors/           # UsageStats, screen state, app focus
+│   ├── data/                             # Drift schema, repository, native bridge, providers
+│   ├── permissions/                      # Permission status queries via MethodChannel
+│   └── ui/                               # Screens (Today, Permissions, Privacy)
+├── android/app/src/main/
+│   ├── AndroidManifest.xml               # Foreground service + 3 collector services
+│   ├── kotlin/com/velovault/panopticon/
+│   │   ├── PanopticonApp.kt              # Application — registers notification channel
+│   │   ├── PanopticonForegroundService.kt
+│   │   ├── PanopticonChannel.kt          # Method/EventChannel handler
+│   │   ├── EventBuffer.kt                # In-memory ring buffer, drained every 10s
+│   │   ├── BootReceiver.kt
+│   │   ├── MainActivity.kt
+│   │   ├── services/
+│   │   │   ├── PanopticonAccessibilityService.kt
+│   │   │   └── PanopticonNotificationListener.kt
+│   │   └── collectors/
+│   │       └── UsageStatsCollector.kt
+│   └── res/xml/accessibility_service_config.xml
 ├── pubspec.yaml
 └── pubspec.lock
 ```
 
-## To scaffold (next session, on a desktop with Android SDK)
+The project targets Android first, with iOS, Windows, macOS, and Linux platforms also generated. Per [`../ARCHITECTURE.md`](../ARCHITECTURE.md), iOS will ship as a degraded-feature client (no system collectors); desktop platforms are placeholders today and become real targets in Phase 4.
+
+## Building
 
 ```bash
-cd panopticon
-flutter create --org com.velovault --project-name panopticon --platforms android,windows,macos,linux android
-# (Yes, the directory is named `android`. Inside it lives a multi-platform Flutter project; we'll target Android first and desktop later.)
+cd android
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter run
 ```
 
-Then add dependencies in `android/pubspec.yaml`:
+You'll need:
 
-- `drift` + `drift_dev` for SQLite.
-- `flutter_riverpod` for state management.
-- `path_provider`, `permission_handler` for permission/file management.
+- Flutter ≥ 3.41
+- Android SDK with platform 34 + build-tools 34
+- A real Android device (the emulator lies about service lifecycle behavior)
 
-## Why this isn't done yet
+The first launch shows three empty screens. Granting Accessibility, Notification Listener, and Usage Access from the **Permissions** tab starts the foreground service; events begin flowing into the **Today** tab as you use the device.
 
-The repository was bootstrapped from a laptop without an Android development environment. Flutter scaffolding generates ~150 files, most of which are platform-specific and easier to verify on the machine that will actually build APKs. Doing it from a different machine would either:
+## Code generation
 
-1. Generate the project with platform-specific paths that match the wrong machine, or
-2. Skip platform generation, leaving the project broken.
+Drift and Riverpod both rely on `build_runner`. Re-run after editing `lib/data/database.dart` or any `@riverpod`-annotated function:
 
-So we deliberately deferred this step. Pick it up on the desktop machine with Android Studio installed.
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+## Phase 1 scope
+
+What this layer does today, per [`../docs/data-sources.md`](../docs/data-sources.md):
+
+- **Accessibility**: `window_state_changed`, `app_focus_changed` (with dwell), `screen_on`, `screen_off`. Metadata only — no app text content.
+- **Notification Listener**: `notification_posted` and `notification_removed`, with title/text/category/priority.
+- **UsageStats**: hourly per-app foreground time and launch count rollups, derived from `UsageStatsManager`.
+- **Local persistence**: Drift over SQLite. Schema versioned from v1 with the migration block already wired.
+- **Privacy controls**: full export-to-JSON + delete-everything from the Privacy tab.
+
+What this layer does NOT do yet (deferred to later phases):
+
+- Sync to a home server (Phase 4).
+- Read text content of any app (Phase 6+, separate explicit toggle).
+- AI coaching, briefings, or persona system (Phase 5).
+- Manual journal / instrument administration / cognitive tests (Phase 2–3).
