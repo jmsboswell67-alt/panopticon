@@ -1,8 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../instruments/instrument.dart';
+import '../instruments/instrument_loader.dart';
 import 'database.dart';
 import 'event_repository.dart';
+import 'instrument_repository.dart';
+import 'manual_repository.dart';
 import 'native_bridge.dart';
 
 part 'providers.g.dart';
@@ -25,6 +29,40 @@ NativeBridge nativeBridge(Ref ref) {
   bridge.start();
   ref.onDispose(bridge.stop);
   return bridge;
+}
+
+@Riverpod(keepAlive: true)
+InstrumentLoader instrumentLoader(Ref ref) => InstrumentLoader();
+
+@Riverpod(keepAlive: true)
+ManualRepository manualRepository(Ref ref) {
+  return ManualRepository(
+    ref.watch(panopticonDatabaseProvider),
+    ref.watch(eventRepositoryProvider),
+  );
+}
+
+@Riverpod(keepAlive: true)
+InstrumentRepository instrumentRepository(Ref ref) {
+  return InstrumentRepository(
+    ref.watch(panopticonDatabaseProvider),
+    ref.watch(eventRepositoryProvider),
+  );
+}
+
+@riverpod
+Future<List<Instrument>> availableInstruments(Ref ref) {
+  return ref.watch(instrumentLoaderProvider).loadAll();
+}
+
+@riverpod
+Future<Instrument> instrumentById(Ref ref, String id) {
+  return ref.watch(instrumentLoaderProvider).load(id);
+}
+
+@riverpod
+Future<DateTime?> lastAdministered(Ref ref, String instrumentId) {
+  return ref.watch(instrumentRepositoryProvider).lastAdministeredAt(instrumentId);
 }
 
 @riverpod

@@ -1,0 +1,93 @@
+{
+  "$schema": "../schema/instrument.schema.json",
+  "instrument_id": "iri",
+  "instrument_version": "1980",
+  "name": "Interpersonal Reactivity Index",
+  "purpose": "Multidimensional measure of empathy. Four subscales: Perspective Taking (PT), Fantasy (FS), Empathic Concern (EC), Personal Distress (PD). Captures the cognitive/affective distinction at the trait level.",
+  "citation": "Davis, M. H. (1980). A multidimensional approach to individual differences in empathy. JSAS Catalog of Selected Documents in Psychology, 10, 85.",
+  "license": "Davis released the IRI for free use in research. Items are widely reproduced in published literature. Verify current licensing at https://www.eckerd.edu/psychology/iri/ before commercial redistribution. This project is non-commercial (see PROJECT_PRINCIPLES.md).",
+  "administration": {
+    "default_frequency": "monthly",
+    "minimum_interval_days": 28,
+    "estimated_minutes": 8,
+    "recall_window_days": null
+  },
+  "response_format": {
+    "type": "likert",
+    "options": [
+      {"value": 0, "label": "Does not describe me well"},
+      {"value": 1, "label": "1"},
+      {"value": 2, "label": "2"},
+      {"value": 3, "label": "3"},
+      {"value": 4, "label": "Describes me very well"}
+    ]
+  },
+  "stem": "The following statements inquire about your thoughts and feelings in a variety of situations. For each item, indicate how well it describes you by choosing the appropriate option. Read each item carefully and answer as honestly as you can.",
+  "items": [
+    {"item_id": "iri_1", "prompt": "I daydream and fantasize, with some regularity, about things that might happen to me.", "subscale": "FS"},
+    {"item_id": "iri_2", "prompt": "I often have tender, concerned feelings for people less fortunate than me.", "subscale": "EC"},
+    {"item_id": "iri_3", "prompt": "I sometimes find it difficult to see things from the other person's point of view.", "subscale": "PT", "reverse": true},
+    {"item_id": "iri_4", "prompt": "Sometimes I don't feel very sorry for other people when they are having problems.", "subscale": "EC", "reverse": true},
+    {"item_id": "iri_5", "prompt": "I really get involved with the feelings of the characters in a novel.", "subscale": "FS"},
+    {"item_id": "iri_6", "prompt": "In emergency situations, I feel apprehensive and ill-at-ease.", "subscale": "PD"},
+    {"item_id": "iri_7", "prompt": "I am usually objective when I watch a movie or play, and I don't often get completely caught up in it.", "subscale": "FS", "reverse": true},
+    {"item_id": "iri_8", "prompt": "I try to look at everybody's side of a disagreement before I make a decision.", "subscale": "PT"},
+    {"item_id": "iri_9", "prompt": "When I see someone being taken advantage of, I feel kind of protective towards them.", "subscale": "EC"},
+    {"item_id": "iri_10", "prompt": "I sometimes feel helpless when I am in the middle of a very emotional situation.", "subscale": "PD"},
+    {"item_id": "iri_11", "prompt": "I sometimes try to understand my friends better by imagining how things look from their perspective.", "subscale": "PT"},
+    {"item_id": "iri_12", "prompt": "Becoming extremely involved in a good book or movie is somewhat rare for me.", "subscale": "FS", "reverse": true},
+    {"item_id": "iri_13", "prompt": "When I see someone get hurt, I tend to remain calm.", "subscale": "PD", "reverse": true},
+    {"item_id": "iri_14", "prompt": "Other people's misfortunes do not usually disturb me a great deal.", "subscale": "EC", "reverse": true},
+    {"item_id": "iri_15", "prompt": "If I'm sure I'm right about something, I don't waste much time listening to other people's arguments.", "subscale": "PT", "reverse": true},
+    {"item_id": "iri_16", "prompt": "After seeing a play or movie, I have felt as though I were one of the characters.", "subscale": "FS"},
+    {"item_id": "iri_17", "prompt": "Being in a tense emotional situation scares me.", "subscale": "PD"},
+    {"item_id": "iri_18", "prompt": "When I see someone being treated unfairly, I sometimes don't feel very much pity for them.", "subscale": "EC", "reverse": true},
+    {"item_id": "iri_19", "prompt": "I am usually pretty effective in dealing with emergencies.", "subscale": "PD", "reverse": true},
+    {"item_id": "iri_20", "prompt": "I am often quite touched by things that I see happen.", "subscale": "EC"},
+    {"item_id": "iri_21", "prompt": "I believe that there are two sides to every question and try to look at them both.", "subscale": "PT"},
+    {"item_id": "iri_22", "prompt": "I would describe myself as a pretty soft-hearted person.", "subscale": "EC"},
+    {"item_id": "iri_23", "prompt": "When I watch a good movie, I can very easily put myself in the place of a leading character.", "subscale": "FS"},
+    {"item_id": "iri_24", "prompt": "I tend to lose control during emergencies.", "subscale": "PD"},
+    {"item_id": "iri_25", "prompt": "When I'm upset at someone, I usually try to 'put myself in his shoes' for a while.", "subscale": "PT"},
+    {"item_id": "iri_26", "prompt": "When I am reading an interesting story or novel, I imagine how I would feel if the events in the story were happening to me.", "subscale": "FS"},
+    {"item_id": "iri_27", "prompt": "When I see someone who badly needs help in an emergency, I go to pieces.", "subscale": "PD"},
+    {"item_id": "iri_28", "prompt": "Before criticizing somebody, I try to imagine how I would feel if I were in their place.", "subscale": "PT"}
+  ],
+  "scoring": {
+    "subscales": [
+      {
+        "subscale_id": "PT",
+        "name": "Perspective Taking",
+        "description": "Cognitive empathy — tendency to spontaneously adopt others' psychological points of view.",
+        "items": ["iri_3", "iri_8", "iri_11", "iri_15", "iri_21", "iri_25", "iri_28"],
+        "method": "sum_with_reversal",
+        "max_score": 28
+      },
+      {
+        "subscale_id": "FS",
+        "name": "Fantasy",
+        "description": "Tendency to transpose oneself into the feelings and actions of fictional characters.",
+        "items": ["iri_1", "iri_5", "iri_7", "iri_12", "iri_16", "iri_23", "iri_26"],
+        "method": "sum_with_reversal",
+        "max_score": 28
+      },
+      {
+        "subscale_id": "EC",
+        "name": "Empathic Concern",
+        "description": "Other-oriented feelings of sympathy and concern for unfortunate others.",
+        "items": ["iri_2", "iri_4", "iri_9", "iri_14", "iri_18", "iri_20", "iri_22"],
+        "method": "sum_with_reversal",
+        "max_score": 28
+      },
+      {
+        "subscale_id": "PD",
+        "name": "Personal Distress",
+        "description": "Self-oriented feelings of personal anxiety and unease in tense interpersonal settings.",
+        "items": ["iri_6", "iri_10", "iri_13", "iri_17", "iri_19", "iri_24", "iri_27"],
+        "method": "sum_with_reversal",
+        "max_score": 28
+      }
+    ],
+    "flag_rules": []
+  }
+}

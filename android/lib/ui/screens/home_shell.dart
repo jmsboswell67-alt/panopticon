@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'log_screen.dart';
 import 'permissions_screen.dart';
 import 'privacy_screen.dart';
 import 'today_screen.dart';
@@ -16,6 +17,7 @@ class _HomeShellState extends State<HomeShell> {
 
   static const _screens = <Widget>[
     TodayScreen(),
+    LogScreen(),
     PermissionsScreen(),
     PrivacyScreen(),
   ];
@@ -32,6 +34,11 @@ class _HomeShellState extends State<HomeShell> {
             icon: Icon(Icons.today_outlined),
             selectedIcon: Icon(Icons.today),
             label: 'Today',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.add_box_outlined),
+            selectedIcon: Icon(Icons.add_box),
+            label: 'Log',
           ),
           NavigationDestination(
             icon: Icon(Icons.lock_outlined),

@@ -1,0 +1,69 @@
+{
+  "$schema": "../schema/instrument.schema.json",
+  "instrument_id": "phq9",
+  "instrument_version": "1.0",
+  "name": "Patient Health Questionnaire-9",
+  "purpose": "Depression severity screening. Each item asks how often the user has been bothered by a depressive symptom over the last 2 weeks.",
+  "citation": "Kroenke, K., Spitzer, R. L., & Williams, J. B. W. (2001). The PHQ-9: validity of a brief depression severity measure. Journal of General Internal Medicine, 16(9), 606-613.",
+  "license": "Public domain. Released by Pfizer; free to reproduce, translate, display, distribute.",
+  "administration": {
+    "default_frequency": "weekly",
+    "minimum_interval_days": 7,
+    "estimated_minutes": 3,
+    "recall_window_days": 14
+  },
+  "response_format": {
+    "type": "likert",
+    "options": [
+      {"value": 0, "label": "Not at all"},
+      {"value": 1, "label": "Several days"},
+      {"value": 2, "label": "More than half the days"},
+      {"value": 3, "label": "Nearly every day"}
+    ]
+  },
+  "stem": "Over the last 2 weeks, how often have you been bothered by any of the following problems?",
+  "items": [
+    {"item_id": "phq9_1", "prompt": "Little interest or pleasure in doing things"},
+    {"item_id": "phq9_2", "prompt": "Feeling down, depressed, or hopeless"},
+    {"item_id": "phq9_3", "prompt": "Trouble falling or staying asleep, or sleeping too much"},
+    {"item_id": "phq9_4", "prompt": "Feeling tired or having little energy"},
+    {"item_id": "phq9_5", "prompt": "Poor appetite or overeating"},
+    {"item_id": "phq9_6", "prompt": "Feeling bad about yourself — or that you are a failure or have let yourself or your family down"},
+    {"item_id": "phq9_7", "prompt": "Trouble concentrating on things, such as reading the newspaper or watching television"},
+    {"item_id": "phq9_8", "prompt": "Moving or speaking so slowly that other people could have noticed; or the opposite — being so fidgety or restless that you have been moving around a lot more than usual"},
+    {"item_id": "phq9_9", "prompt": "Thoughts that you would be better off dead or of hurting yourself in some way", "safety_critical": true}
+  ],
+  "scoring": {
+    "subscales": [
+      {
+        "subscale_id": "total",
+        "name": "PHQ-9 Total Score",
+        "items": ["phq9_1", "phq9_2", "phq9_3", "phq9_4", "phq9_5", "phq9_6", "phq9_7", "phq9_8", "phq9_9"],
+        "method": "sum",
+        "interpretation": [
+          {"range": [0, 4], "label": "None-minimal", "severity": "info"},
+          {"range": [5, 9], "label": "Mild depression", "severity": "watch"},
+          {"range": [10, 14], "label": "Moderate depression", "severity": "concern"},
+          {"range": [15, 19], "label": "Moderately severe depression", "severity": "concern"},
+          {"range": [20, 27], "label": "Severe depression", "severity": "urgent"}
+        ]
+      }
+    ],
+    "flag_rules": [
+      {
+        "rule_id": "phq9_item9_positive",
+        "description": "Any non-zero response on item 9 (suicidality) flags regardless of total score.",
+        "condition": "phq9_9 > 0",
+        "flag_category": "suicidality",
+        "flag_severity_map": {"1": "watch", "2": "concern", "3": "urgent"}
+      },
+      {
+        "rule_id": "phq9_total_severe",
+        "description": "Total score in severe range",
+        "condition": "total >= 20",
+        "flag_category": "depression_severity",
+        "flag_severity": "urgent"
+      }
+    ]
+  }
+}
