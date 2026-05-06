@@ -5,9 +5,11 @@ import '../instruments/instrument.dart';
 import '../instruments/instrument_loader.dart';
 import 'database.dart';
 import 'event_repository.dart';
+import 'import_service.dart';
 import 'instrument_repository.dart';
 import 'manual_repository.dart';
 import 'native_bridge.dart';
+import 'text_capture_repository.dart';
 
 part 'providers.g.dart';
 
@@ -48,6 +50,28 @@ InstrumentRepository instrumentRepository(Ref ref) {
     ref.watch(panopticonDatabaseProvider),
     ref.watch(eventRepositoryProvider),
   );
+}
+
+@Riverpod(keepAlive: true)
+ImportService importService(Ref ref) {
+  return ImportService(
+    ref.watch(panopticonDatabaseProvider),
+    ref.watch(eventRepositoryProvider),
+  );
+}
+
+@Riverpod(keepAlive: true)
+TextCaptureRepository textCaptureRepository(Ref ref) {
+  final repo = TextCaptureRepository(ref.watch(panopticonDatabaseProvider));
+  // Push current allowlist to native on app launch so a fresh process
+  // sees the persisted state without waiting for the user to edit it.
+  repo.bootstrapNative();
+  return repo;
+}
+
+@riverpod
+Stream<List<TextCaptureAllowlistData>> textCaptureAllowlist(Ref ref) {
+  return ref.watch(textCaptureRepositoryProvider).watchAllowlist();
 }
 
 @riverpod

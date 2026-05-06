@@ -110,6 +110,61 @@ final instrumentRepositoryProvider = Provider<InstrumentRepository>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef InstrumentRepositoryRef = ProviderRef<InstrumentRepository>;
+String _$importServiceHash() => r'5617c62c0949f4c011b2e1f7df940947a9c24a66';
+
+/// See also [importService].
+@ProviderFor(importService)
+final importServiceProvider = Provider<ImportService>.internal(
+  importService,
+  name: r'importServiceProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$importServiceHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef ImportServiceRef = ProviderRef<ImportService>;
+String _$textCaptureRepositoryHash() =>
+    r'0667319c284d56546bbbf1e093cdfb9298aa3a4e';
+
+/// See also [textCaptureRepository].
+@ProviderFor(textCaptureRepository)
+final textCaptureRepositoryProvider = Provider<TextCaptureRepository>.internal(
+  textCaptureRepository,
+  name: r'textCaptureRepositoryProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$textCaptureRepositoryHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TextCaptureRepositoryRef = ProviderRef<TextCaptureRepository>;
+String _$textCaptureAllowlistHash() =>
+    r'ddb49f4fd5ac5e35e0e0b354f989bdcaf33e9efb';
+
+/// See also [textCaptureAllowlist].
+@ProviderFor(textCaptureAllowlist)
+final textCaptureAllowlistProvider =
+    AutoDisposeStreamProvider<List<TextCaptureAllowlistData>>.internal(
+      textCaptureAllowlist,
+      name: r'textCaptureAllowlistProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$textCaptureAllowlistHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef TextCaptureAllowlistRef =
+    AutoDisposeStreamProviderRef<List<TextCaptureAllowlistData>>;
 String _$availableInstrumentsHash() =>
     r'1cdfd1bad26f169555327c7c075528c52d9bde49';
 

@@ -2,7 +2,7 @@
 
 > A personal behavioral observation and self-coaching system. Local-first. Open source. Built as a research project, not a product.
 
-**Status: Phase 1 — repository skeleton.** The Android app is being scaffolded. Nothing here yet runs on a real device.
+**Status: Phase 3 — external data ingestion + opt-in text capture.** The Android app, schema, instruments, journal pipeline, manual entry surfaces, desktop collector, and per-app text-capture allowlist are all in place. Builds and runs on a real device.
 
 ---
 

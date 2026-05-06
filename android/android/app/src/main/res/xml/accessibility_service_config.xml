@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Accessibility service configuration.
+
+    `canRetrieveWindowContent` is *enabled* but actual text capture is gated
+    at runtime by the per-package allowlist managed in the Flutter app
+    (see `TextCaptureRepository`). With the allowlist empty, the service
+    behaves identically to the Phase 1 capture (window-state changes only,
+    no text content).
+
+    `notificationTimeout` is increased to 250ms to coalesce rapid scrolls
+    into one capture event per (package, screen-signature, window) pair.
+-->
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
     android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
     android:accessibilityFeedbackType="feedbackGeneric"
-    android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows"
-    android:canRetrieveWindowContent="false"
+    android:accessibilityFlags="flagDefault|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
+    android:canRetrieveWindowContent="true"
     android:description="@string/accessibility_service_description"
-    android:notificationTimeout="100"
+    android:notificationTimeout="250"
     android:settingsActivity="com.velovault.panopticon.MainActivity" />

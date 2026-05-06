@@ -4,6 +4,7 @@ import android.app.AppOpsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Process
@@ -90,8 +91,44 @@ class PanopticonChannel(private val context: Context) : MethodChannel.MethodCall
                 UsageStatsCollector.collectDailySummary(context)
                 result.success(null)
             }
+            "updateTextCaptureAllowlist" -> {
+                @Suppress("UNCHECKED_CAST")
+                val packages = (call.argument<List<String>>("packages")) ?: emptyList()
+                TextCaptureAllowlistStore.update(context, packages)
+                result.success(null)
+            }
+            "getInstalledLaunchableApps" -> {
+                result.success(getInstalledLaunchableApps())
+            }
             else -> result.notImplemented()
         }
+    }
+
+    private fun getInstalledLaunchableApps(): List<Map<String, String>> {
+        val pm = context.packageManager
+        val intent = Intent(Intent.ACTION_MAIN, null).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            PackageManager.ResolveInfoFlags.of(0L)
+        } else null
+        val resolved = if (flags != null) {
+            pm.queryIntentActivities(intent, flags)
+        } else {
+            @Suppress("DEPRECATION")
+            pm.queryIntentActivities(intent, 0)
+        }
+        val seen = mutableMapOf<String, String>()
+        for (ri in resolved) {
+            val ai = ri.activityInfo ?: continue
+            val pkg = ai.packageName ?: continue
+            if (pkg == context.packageName) continue
+            val label = ai.loadLabel(pm).toString()
+            seen.putIfAbsent(pkg, label)
+        }
+        return seen.entries.map { (pkg, label) ->
+            mapOf("package_name" to pkg, "display_name" to label)
+        }.sortedBy { it["display_name"]?.lowercase() ?: "" }
     }
 
     // ---- Permission queries -------------------------------------------------

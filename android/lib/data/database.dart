@@ -55,14 +55,28 @@ class DailyRollups extends Table {
       ];
 }
 
-@DriftDatabase(tables: [Events, AppSessions, Notifications, DailyRollups])
+/// Per-app allowlist for in-app text capture by the accessibility service.
+/// Empty by default — nothing captured until the user explicitly opts an
+/// app in. Mirrored to Android SharedPreferences via the native bridge so
+/// the foreground accessibility service can read it without round-tripping
+/// to Dart on every event.
+class TextCaptureAllowlist extends Table {
+  TextColumn get packageName => text().named('package_name')();
+  TextColumn get displayName => text().named('display_name').nullable()();
+  IntColumn get addedAtUtc => integer().named('added_at_utc')();
+
+  @override
+  Set<Column> get primaryKey => {packageName};
+}
+
+@DriftDatabase(tables: [Events, AppSessions, Notifications, DailyRollups, TextCaptureAllowlist])
 class PanopticonDatabase extends _$PanopticonDatabase {
   PanopticonDatabase() : super(_open());
 
   PanopticonDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -70,9 +84,9 @@ class PanopticonDatabase extends _$PanopticonDatabase {
           await m.createAll();
         },
         onUpgrade: (m, from, to) async {
-          // Migration paths land here as the schema evolves.
-          // Each step from N → N+1 should be its own block:
-          //   if (from < 2) { await m.addColumn(events, events.someNewCol); }
+          if (from < 2) {
+            await m.createTable(textCaptureAllowlist);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

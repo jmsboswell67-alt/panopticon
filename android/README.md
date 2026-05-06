@@ -85,14 +85,23 @@ What the manual entry layer does, per [`../docs/screening-instruments.md`](../do
 - **Observed interaction**: timestamped quick-log per the `manual_observed_interaction` payload (category / valence / intensity / parties / notes).
 - **Tier labeling**: every measurement screen surfaces its tier ("Validated screen" / "Project-specific self-report") per [`../docs/custom-measurements.md`](../docs/custom-measurements.md).
 
+## Phase 3 scope
+
+External-data ingestion + opt-in in-app text capture:
+
+- **NDJSON import** from the [`../desktop-collector/`](../desktop-collector/) Python tool. Privacy → "Import desktop collector NDJSON" picks a file via the system file picker, parses each line, previews counts by `(source, event_type)`, and persists in a transaction. Re-imports are not yet deduplicated — that lands later.
+- **`media` source** added to the schema for streaming consumption events (`media.video_view`, `media.audio_play`, `media.podcast_play`).
+- **Per-app text-capture allowlist**. The accessibility service already had the permission; Phase 3 flips `canRetrieveWindowContent` on but gates actual capture by a per-package opt-in list managed in the app. Empty by default — nothing captured. Add TikTok / Instagram / YouTube / etc. via a picker that lists installed launchable apps. Capture is throttled to one snapshot per ~2s per (package, screen-signature). Password fields and EditText input fields are excluded.
+- **Schema v2 migration**: adds `text_capture_allowlist` table.
+
 What this layer does NOT do yet (deferred to later phases):
 
+- Re-import deduplication (planned dedup key: `(source, event_type, timestamp_utc, hash(payload))`).
 - Trauma-informed intro/exit screens (Phase 2.5 — when ACE-Q / PCL-5 land).
-- Self-hypothesis testing against the event log (Phase 3 — needs the aggregator).
+- Self-hypothesis testing against the event log (Phase 3.5 — needs the aggregator).
 - Sync to a home server (Phase 4).
-- Read text content of any app (Phase 6+, separate explicit toggle).
 - AI coaching, briefings, or persona system (Phase 5).
-- Cognitive tests (Phase 3+).
+- Cognitive tests (Phase 3.5+).
 - Context intake / values / goals (Phase 2.5 / 3).
 
 ## Working with the bundled instruments

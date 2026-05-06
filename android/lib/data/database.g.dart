@@ -1819,6 +1819,298 @@ class DailyRollupsCompanion extends UpdateCompanion<DailyRollup> {
   }
 }
 
+class $TextCaptureAllowlistTable extends TextCaptureAllowlist
+    with TableInfo<$TextCaptureAllowlistTable, TextCaptureAllowlistData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TextCaptureAllowlistTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _packageNameMeta = const VerificationMeta(
+    'packageName',
+  );
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+    'package_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _addedAtUtcMeta = const VerificationMeta(
+    'addedAtUtc',
+  );
+  @override
+  late final GeneratedColumn<int> addedAtUtc = GeneratedColumn<int>(
+    'added_at_utc',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [packageName, displayName, addedAtUtc];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'text_capture_allowlist';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TextCaptureAllowlistData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('package_name')) {
+      context.handle(
+        _packageNameMeta,
+        packageName.isAcceptableOrUnknown(
+          data['package_name']!,
+          _packageNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_packageNameMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('added_at_utc')) {
+      context.handle(
+        _addedAtUtcMeta,
+        addedAtUtc.isAcceptableOrUnknown(
+          data['added_at_utc']!,
+          _addedAtUtcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_addedAtUtcMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {packageName};
+  @override
+  TextCaptureAllowlistData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TextCaptureAllowlistData(
+      packageName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}package_name'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
+      addedAtUtc: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}added_at_utc'],
+      )!,
+    );
+  }
+
+  @override
+  $TextCaptureAllowlistTable createAlias(String alias) {
+    return $TextCaptureAllowlistTable(attachedDatabase, alias);
+  }
+}
+
+class TextCaptureAllowlistData extends DataClass
+    implements Insertable<TextCaptureAllowlistData> {
+  final String packageName;
+  final String? displayName;
+  final int addedAtUtc;
+  const TextCaptureAllowlistData({
+    required this.packageName,
+    this.displayName,
+    required this.addedAtUtc,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['package_name'] = Variable<String>(packageName);
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
+    map['added_at_utc'] = Variable<int>(addedAtUtc);
+    return map;
+  }
+
+  TextCaptureAllowlistCompanion toCompanion(bool nullToAbsent) {
+    return TextCaptureAllowlistCompanion(
+      packageName: Value(packageName),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
+      addedAtUtc: Value(addedAtUtc),
+    );
+  }
+
+  factory TextCaptureAllowlistData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TextCaptureAllowlistData(
+      packageName: serializer.fromJson<String>(json['packageName']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
+      addedAtUtc: serializer.fromJson<int>(json['addedAtUtc']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'packageName': serializer.toJson<String>(packageName),
+      'displayName': serializer.toJson<String?>(displayName),
+      'addedAtUtc': serializer.toJson<int>(addedAtUtc),
+    };
+  }
+
+  TextCaptureAllowlistData copyWith({
+    String? packageName,
+    Value<String?> displayName = const Value.absent(),
+    int? addedAtUtc,
+  }) => TextCaptureAllowlistData(
+    packageName: packageName ?? this.packageName,
+    displayName: displayName.present ? displayName.value : this.displayName,
+    addedAtUtc: addedAtUtc ?? this.addedAtUtc,
+  );
+  TextCaptureAllowlistData copyWithCompanion(
+    TextCaptureAllowlistCompanion data,
+  ) {
+    return TextCaptureAllowlistData(
+      packageName: data.packageName.present
+          ? data.packageName.value
+          : this.packageName,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      addedAtUtc: data.addedAtUtc.present
+          ? data.addedAtUtc.value
+          : this.addedAtUtc,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TextCaptureAllowlistData(')
+          ..write('packageName: $packageName, ')
+          ..write('displayName: $displayName, ')
+          ..write('addedAtUtc: $addedAtUtc')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(packageName, displayName, addedAtUtc);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TextCaptureAllowlistData &&
+          other.packageName == this.packageName &&
+          other.displayName == this.displayName &&
+          other.addedAtUtc == this.addedAtUtc);
+}
+
+class TextCaptureAllowlistCompanion
+    extends UpdateCompanion<TextCaptureAllowlistData> {
+  final Value<String> packageName;
+  final Value<String?> displayName;
+  final Value<int> addedAtUtc;
+  final Value<int> rowid;
+  const TextCaptureAllowlistCompanion({
+    this.packageName = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.addedAtUtc = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TextCaptureAllowlistCompanion.insert({
+    required String packageName,
+    this.displayName = const Value.absent(),
+    required int addedAtUtc,
+    this.rowid = const Value.absent(),
+  }) : packageName = Value(packageName),
+       addedAtUtc = Value(addedAtUtc);
+  static Insertable<TextCaptureAllowlistData> custom({
+    Expression<String>? packageName,
+    Expression<String>? displayName,
+    Expression<int>? addedAtUtc,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (packageName != null) 'package_name': packageName,
+      if (displayName != null) 'display_name': displayName,
+      if (addedAtUtc != null) 'added_at_utc': addedAtUtc,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TextCaptureAllowlistCompanion copyWith({
+    Value<String>? packageName,
+    Value<String?>? displayName,
+    Value<int>? addedAtUtc,
+    Value<int>? rowid,
+  }) {
+    return TextCaptureAllowlistCompanion(
+      packageName: packageName ?? this.packageName,
+      displayName: displayName ?? this.displayName,
+      addedAtUtc: addedAtUtc ?? this.addedAtUtc,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (addedAtUtc.present) {
+      map['added_at_utc'] = Variable<int>(addedAtUtc.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TextCaptureAllowlistCompanion(')
+          ..write('packageName: $packageName, ')
+          ..write('displayName: $displayName, ')
+          ..write('addedAtUtc: $addedAtUtc, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$PanopticonDatabase extends GeneratedDatabase {
   _$PanopticonDatabase(QueryExecutor e) : super(e);
   $PanopticonDatabaseManager get managers => $PanopticonDatabaseManager(this);
@@ -1826,6 +2118,8 @@ abstract class _$PanopticonDatabase extends GeneratedDatabase {
   late final $AppSessionsTable appSessions = $AppSessionsTable(this);
   late final $NotificationsTable notifications = $NotificationsTable(this);
   late final $DailyRollupsTable dailyRollups = $DailyRollupsTable(this);
+  late final $TextCaptureAllowlistTable textCaptureAllowlist =
+      $TextCaptureAllowlistTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1835,6 +2129,7 @@ abstract class _$PanopticonDatabase extends GeneratedDatabase {
     appSessions,
     notifications,
     dailyRollups,
+    textCaptureAllowlist,
   ];
 }
 
@@ -2781,6 +3076,190 @@ typedef $$DailyRollupsTableProcessedTableManager =
       DailyRollup,
       PrefetchHooks Function()
     >;
+typedef $$TextCaptureAllowlistTableCreateCompanionBuilder =
+    TextCaptureAllowlistCompanion Function({
+      required String packageName,
+      Value<String?> displayName,
+      required int addedAtUtc,
+      Value<int> rowid,
+    });
+typedef $$TextCaptureAllowlistTableUpdateCompanionBuilder =
+    TextCaptureAllowlistCompanion Function({
+      Value<String> packageName,
+      Value<String?> displayName,
+      Value<int> addedAtUtc,
+      Value<int> rowid,
+    });
+
+class $$TextCaptureAllowlistTableFilterComposer
+    extends Composer<_$PanopticonDatabase, $TextCaptureAllowlistTable> {
+  $$TextCaptureAllowlistTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get addedAtUtc => $composableBuilder(
+    column: $table.addedAtUtc,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TextCaptureAllowlistTableOrderingComposer
+    extends Composer<_$PanopticonDatabase, $TextCaptureAllowlistTable> {
+  $$TextCaptureAllowlistTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get addedAtUtc => $composableBuilder(
+    column: $table.addedAtUtc,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TextCaptureAllowlistTableAnnotationComposer
+    extends Composer<_$PanopticonDatabase, $TextCaptureAllowlistTable> {
+  $$TextCaptureAllowlistTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get packageName => $composableBuilder(
+    column: $table.packageName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get addedAtUtc => $composableBuilder(
+    column: $table.addedAtUtc,
+    builder: (column) => column,
+  );
+}
+
+class $$TextCaptureAllowlistTableTableManager
+    extends
+        RootTableManager<
+          _$PanopticonDatabase,
+          $TextCaptureAllowlistTable,
+          TextCaptureAllowlistData,
+          $$TextCaptureAllowlistTableFilterComposer,
+          $$TextCaptureAllowlistTableOrderingComposer,
+          $$TextCaptureAllowlistTableAnnotationComposer,
+          $$TextCaptureAllowlistTableCreateCompanionBuilder,
+          $$TextCaptureAllowlistTableUpdateCompanionBuilder,
+          (
+            TextCaptureAllowlistData,
+            BaseReferences<
+              _$PanopticonDatabase,
+              $TextCaptureAllowlistTable,
+              TextCaptureAllowlistData
+            >,
+          ),
+          TextCaptureAllowlistData,
+          PrefetchHooks Function()
+        > {
+  $$TextCaptureAllowlistTableTableManager(
+    _$PanopticonDatabase db,
+    $TextCaptureAllowlistTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TextCaptureAllowlistTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TextCaptureAllowlistTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$TextCaptureAllowlistTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> packageName = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
+                Value<int> addedAtUtc = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TextCaptureAllowlistCompanion(
+                packageName: packageName,
+                displayName: displayName,
+                addedAtUtc: addedAtUtc,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String packageName,
+                Value<String?> displayName = const Value.absent(),
+                required int addedAtUtc,
+                Value<int> rowid = const Value.absent(),
+              }) => TextCaptureAllowlistCompanion.insert(
+                packageName: packageName,
+                displayName: displayName,
+                addedAtUtc: addedAtUtc,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TextCaptureAllowlistTableProcessedTableManager =
+    ProcessedTableManager<
+      _$PanopticonDatabase,
+      $TextCaptureAllowlistTable,
+      TextCaptureAllowlistData,
+      $$TextCaptureAllowlistTableFilterComposer,
+      $$TextCaptureAllowlistTableOrderingComposer,
+      $$TextCaptureAllowlistTableAnnotationComposer,
+      $$TextCaptureAllowlistTableCreateCompanionBuilder,
+      $$TextCaptureAllowlistTableUpdateCompanionBuilder,
+      (
+        TextCaptureAllowlistData,
+        BaseReferences<
+          _$PanopticonDatabase,
+          $TextCaptureAllowlistTable,
+          TextCaptureAllowlistData
+        >,
+      ),
+      TextCaptureAllowlistData,
+      PrefetchHooks Function()
+    >;
 
 class $PanopticonDatabaseManager {
   final _$PanopticonDatabase _db;
@@ -2793,4 +3272,6 @@ class $PanopticonDatabaseManager {
       $$NotificationsTableTableManager(_db, _db.notifications);
   $$DailyRollupsTableTableManager get dailyRollups =>
       $$DailyRollupsTableTableManager(_db, _db.dailyRollups);
+  $$TextCaptureAllowlistTableTableManager get textCaptureAllowlist =>
+      $$TextCaptureAllowlistTableTableManager(_db, _db.textCaptureAllowlist);
 }

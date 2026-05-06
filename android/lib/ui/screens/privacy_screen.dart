@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/providers.dart';
+import 'import_screen.dart';
+import 'text_capture_screen.dart';
 
 class PrivacyScreen extends ConsumerWidget {
   const PrivacyScreen({super.key});
@@ -56,6 +58,21 @@ class PrivacyScreen extends ConsumerWidget {
         ),
         SliverList.list(
           children: [
+            ListTile(
+              leading: const Icon(Icons.input_outlined),
+              title: const Text('Import desktop collector NDJSON'),
+              subtitle: const Text(
+                  'Bring in YouTube watch history, Spotify listens, etc. produced by the Python desktop collector.'),
+              onTap: () => ImportScreen.push(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.visibility_outlined),
+              title: const Text('Text capture allowlist'),
+              subtitle: const Text(
+                  'Per-app opt-in for the accessibility service to read on-screen text. Off by default.'),
+              onTap: () => TextCaptureScreen.push(context),
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.download_outlined),
               title: const Text('Export everything as JSON'),

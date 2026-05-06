@@ -35,7 +35,8 @@
         "purchase",
         "browse",
         "health",
-        "coach"
+        "coach",
+        "media"
       ]
     },
     "event_type": {
@@ -62,7 +63,7 @@
   "$defs": {
     "_event_type_enums": {
       "description": "Reference: valid event_type values per source. Not enforced at the schema level (since payload shapes vary), but documented here for collectors and forkers.",
-      "accessibility": ["window_state_changed", "app_focus_changed", "screen_on", "screen_off"],
+      "accessibility": ["window_state_changed", "app_focus_changed", "screen_on", "screen_off", "text_capture"],
       "notification": ["notification_posted", "notification_removed"],
       "usagestats": ["daily_summary"],
       "desktop": ["active_window_changed", "browser_history_imported", "keystroke_rollup"],
@@ -72,7 +73,8 @@
       "purchase": ["transaction"],
       "browse": ["search_query", "page_visit"],
       "health": ["heart_rate_sample", "hrv_sample", "rhr_sample", "sleep_session", "sleep_stage", "step_count", "spo2_sample", "skin_temp_sample"],
-      "coach": ["briefing", "flag", "hypothesis_test"]
+      "coach": ["briefing", "flag", "hypothesis_test"],
+      "media": ["video_view", "audio_play", "podcast_play"]
     },
 
     "manual_journal_entry_payload": {
@@ -337,6 +339,65 @@
         "counter_event_ids": {"type": "array", "items": {"type": "integer"}},
         "n_observations": {"type": "integer"},
         "n_supporting": {"type": "integer"}
+      }
+    },
+
+    "media_video_view_payload": {
+      "description": "A video view (e.g. a YouTube video). Sourced from the platform's data export, the desktop browser, or — Phase 6+ — in-app accessibility text capture.",
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "platform": {"type": "string", "description": "e.g. 'youtube', 'tiktok', 'vimeo'."},
+        "video_id": {"type": "string", "description": "Platform-internal id when available (e.g. YouTube watch?v=ID)."},
+        "title": {"type": "string"},
+        "channel": {"type": "string", "description": "Creator/channel handle or display name."},
+        "url": {"type": "string"},
+        "duration_seconds": {"type": "integer"},
+        "watched_seconds": {"type": "integer"},
+        "category": {"type": "string"},
+        "topic_tags": {"type": "array", "items": {"type": "string"}},
+        "source_doc": {"type": "string", "description": "How this was ingested: 'google_takeout', 'browser_history_import', 'tiktok_export', 'accessibility_capture', etc."}
+      }
+    },
+
+    "media_audio_play_payload": {
+      "description": "A music/podcast track listen (e.g. Spotify, Apple Music). Sourced from the platform export.",
+      "type": "object",
+      "required": ["track_name"],
+      "properties": {
+        "platform": {"type": "string"},
+        "track_name": {"type": "string"},
+        "artist": {"type": "string"},
+        "album": {"type": "string"},
+        "track_id": {"type": "string"},
+        "ms_played": {"type": "integer"},
+        "skipped": {"type": "boolean"},
+        "shuffled": {"type": "boolean"},
+        "context": {"type": "string", "description": "Playback context, e.g. 'playlist:37i9dQZF...', 'album', 'discover_weekly'."},
+        "source_doc": {"type": "string"}
+      }
+    },
+
+    "accessibility_text_capture_payload": {
+      "description": "A throttled snapshot of visible text from an app the user has explicitly added to the text-capture allowlist. Captures captions, creator handles, hashtags, visible counts — whatever the screen is rendering at that moment. Off by default; controlled per-package by the user. Never captures input fields, password fields, or content-description-marked sensitive views.",
+      "type": "object",
+      "required": ["package_name"],
+      "properties": {
+        "package_name": {"type": "string"},
+        "window_class": {"type": "string"},
+        "screen_signature": {"type": "string", "description": "Stable hash of the screen's view hierarchy — used to dedupe near-identical scroll positions."},
+        "blocks": {
+          "type": "array",
+          "description": "Captured text blocks in render order.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {"type": "string"},
+              "view_id": {"type": "string", "description": "Resource id of the source View, if exposed."},
+              "role": {"type": "string", "description": "Inferred semantic role: 'caption', 'creator', 'hashtag', 'count', 'button', 'unknown'."}
+            }
+          }
+        }
       }
     }
   }

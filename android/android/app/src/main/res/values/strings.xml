@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="accessibility_service_description">Panopticon observes which app is in the foreground and screen on/off events to build your behavioral timeline. It does not read text content of any app.</string>
+    <string name="accessibility_service_description">Panopticon observes which app is in the foreground and screen on/off events to build your behavioral timeline. Text content is captured ONLY for apps you have explicitly added to the in-app text-capture allowlist; the allowlist is empty by default.</string>
     <string name="foreground_service_channel_name">Panopticon collection</string>
     <string name="foreground_service_channel_description">Persistent notification while Panopticon is observing your behavior.</string>
     <string name="foreground_service_notification_title">Panopticon is observing your behavior</string>
